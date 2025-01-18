@@ -1,5 +1,5 @@
 import { app, auth } from "./firebaseConfig.js"; // Import Firebase from firebaseConfig.js
-import { createUserWithEmailAndPassword } from "https://www.gstatic.com/firebasejs/11.1.0/firebase-auth.js";
+import { createUserWithEmailAndPassword, signOut } from "https://www.gstatic.com/firebasejs/11.1.0/firebase-auth.js";
 import { getFirestore, doc, setDoc } from "https://www.gstatic.com/firebasejs/11.1.0/firebase-firestore.js";
 
 // Initialize Firestore
@@ -40,6 +40,9 @@ registrationForm.addEventListener("submit", async (event) => {
     // Display success message
     messageElement.textContent = "Registration successful! You can now sign in.";
     console.log("User registered and added to Firestore:", user);
+
+    signOut(auth)
+    window.location.href = "login-form.html";
   } catch (error) {
     // Handle errors during registration
     const errorCode = error.code;
