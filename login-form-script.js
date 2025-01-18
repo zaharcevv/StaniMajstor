@@ -22,6 +22,8 @@ loginForm.addEventListener("submit", async (event) => {
     const user = userCredential.user;
     messageElement.textContent = `Welcome back, ${user.email}!`;
     console.log("User logged in:", user);
+
+    window.location.href = "homepage.html";
   } catch (error) {
     // Handle errors during login
     messageElement.textContent = `Error: ${error.message}`;
