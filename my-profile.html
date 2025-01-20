@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>My Profile</title>
+  <link rel="stylesheet" href="my-profile-style.css">
+</head>
+<body>
+  <header>
+    <h1>My Profile</h1>
+  </header>
+
+  <main>
+
+    <div class = "user-data">
+        <div class="profile-picture">
+            <div class="picture-placeholder" id="profilePicture">
+              <p>Profile Picture</p>
+            </div>
+            <button id="uploadPicture">Upload Picture</button>
+          </div>
+          
+      
+          <div class="user-info">
+            <p><span id="username">Loading...</span></p>
+            <p><span id="email">Loading...</span></p>
+          </div>      
+    </div>
+
+    <button id="becomeSellerButton" onclick="window.location.href='become-seller.html'">
+        Become a Seller
+      </button>
+    
+  </main>
+
+  <script type="module" src="my-profile-script.js"></script>
+</body>
+</html>
