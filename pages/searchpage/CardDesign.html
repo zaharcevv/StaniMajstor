@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>StaniMajstor</title>
+    <link rel="stylesheet" href="CardDesign.css">
+</head>
+<body>
+    <div class="container">
+        <h1>Електричари</h1>
+        <div class="filter">
+            <label for="grad">Избери град</label>
+            <select id="grad">
+                <option value="site">Сите градови</option>
+                <option value="Скопје">Скопје</option>
+                <option value="Битола">Битола</option>
+            </select>
+        </div>
+        <div class="el" id="cardContainer">
+            <div class="card" data-grad="Скопје">
+                <img src="slika.jpg" alt="Петар Петровски">
+                <div class="sodrzina">
+                    <h3>Петар Петровски</h3>
+                    <p>Електричар во Скопје.</p>
+                    <button class="contact-btn">Контактирај</button>
+                </div>
+            </div>
+            <div class="card" data-grad="Битола">
+                <img src="slika.jpg" alt="Иван Иванов">
+                <div class="sodrzina">
+                    <h3>Иван Иванов</h3>
+                    <p>Електричар во Битола.</p>
+                    <button class="contact-btn">Контактирај</button>
+                </div>
+            </div>
+            <div class="card" data-grad="Скопје">
+                <img src="slika.jpg" alt="Марко Марков">
+                <div class="sodrzina">
+                    <h3>Марко Марков</h3>
+                    <p>Електричар во Скопје.</p>
+                    <button class="contact-btn">Контактирај</button>
+                </div>
+            </div>
+            <div class="card" data-grad="Битола">
+                <img src="slika.jpg" alt="Јован Јовановски">
+                <div class="sodrzina">
+                    <h3>Јован Јовановски</h3>
+                    <p>Електричар во Битола.</p>
+                    <button class="contact-btn">Контактирај</button>
+                </div>
+            </div>
+        </div>
+    </div>
+    <script src="CardDesign.js"></script>
+</body>
+</html>
