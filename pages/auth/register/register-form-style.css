@@ -14,9 +14,9 @@ form{
     padding: 40px;
     border-radius: 10px;
     box-shadow: 0 8px 20px rgba(0, 0, 0, 0.2);
-    width: 400px; 
+    width: 400px;
     text-align: center;
-    box-sizing: border-box; 
+    box-sizing: border-box;
 }
 #logo{
     display: block;
@@ -38,8 +38,9 @@ label{
     font-size: 0.9rem;
 }
 input[type="email"],
-input[type="password"]{
-    width: 100%; 
+input[type="password"],
+input[type="text"]{
+    width: 100%;
     padding: 12px;
     margin-bottom: 20px;
     border: 1px solid #ccc;
@@ -50,7 +51,8 @@ input[type="password"]{
     box-sizing: border-box;
 }
 input[type="email"]:focus,
-input[type="password"]:focus{
+input[type="password"]:focus,
+input[type="text"]:focus{
     border: 1px solid #0077b6;
     box-shadow: 0 0 5px rgba(0, 119, 182, 0.5);
     outline: none;
@@ -71,41 +73,23 @@ button{
 button:hover{
     background-color: #005f8a;
 }
-#newAccount, 
-#forgotPassword{
+#alreadyHaveAccount{
     margin-top: 10px;
     text-align: center;
     font-size: 0.9rem;
 }
-#newAccount p, 
-#forgotPassword p{
+#alreadyHaveAccount p{
     margin: 0;
     color: #555;
 }
-#newAccount a, 
-#forgotPassword a{
-    text-decoration: none;
+#alreadyHaveAccount a{
+    text-decoration: none; 
     color: #0077b6;
     font-weight: bold;
     transition: color 0.3s ease;
 }
-#newAccount a:hover, 
-#forgotPassword a:hover{
+#alreadyHaveAccount a:hover{
     color: #005f8a;
-}
-#logoutSection{
-    background-color: #ffffff;
-    padding: 20px;
-    border-radius: 10px;
-    box-shadow: 0 8px 20px rgba(0, 0, 0, 0.2);
-    margin-top: 20px;
-    width: 400px;
-    text-align: center;
-}
-#welcomeMessage{
-    font-size: 1rem;
-    margin-bottom: 10px;
-    color: #0077b6;
 }
 #message{
     margin-top: 20px;
