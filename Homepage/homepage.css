@@ -2,7 +2,7 @@ body {
   margin: 0;
   font-family: Arial, sans-serif;
   scroll-behavior: smooth;
-  
+  overflow-x: hidden;
 }
 header {
   display: flex;
@@ -244,26 +244,7 @@ font-size: 1.5rem; /* Larger icon */
   font-size: 18px;
   cursor: pointer;
 }
-.team-section {
-  padding: 100px 20px;
-  text-align: center;
-}
-.team-section h2 {
-font-size: 2.5rem;
-font-weight: bold;
-margin-bottom: 20px;
-color: #007bff;
-}
 
-.team-section p {
-font-size: 1.2rem;
-color: #6c757d;
-}
-.team-section .team-image {
-  max-width: 600px;
-  margin: 0 auto;
-  opacity: 0.8;
-}
 footer {
 background-color: #212529;
 color: white;
@@ -359,3 +340,234 @@ padding: 10px 20px;
 text-align: center;
 }
 
+
+/* nuts */
+
+.hero .fa-cog{
+  position: absolute;
+  font-size: 30rem;
+  opacity: 0.35;
+  color: white;
+  animation: rotate 10s linear infinite;
+}
+
+.hero .nut1{
+  top: 10%; 
+  left: -15rem;
+
+}
+
+.hero .nut2{
+  bottom: 23%;
+  right: -13rem;
+}
+
+@keyframes rotate{
+  100%{
+    transform: rotate(360deg);
+  }
+}
+
+/* team section */
+
+/* Team Section */
+.team-section {
+  padding: 70px 20px;
+  text-align: center;
+  background: linear-gradient(135deg, #007bff, #4db8ff);
+  color: white;
+  margin: 50px 0;
+  border-radius: 10px; /* Rounded corners for the section */
+  box-shadow: 0px 8px 20px rgba(0, 0, 0, 0.2);
+}
+
+.team-heading h2 {
+  font-size: 3rem;
+  font-weight: bold;
+  margin-bottom: 20px;
+  color: white;
+  text-shadow: 0px 4px 10px rgba(0, 0, 0, 0.2);
+  animation: fadeInDown 1s ease-in-out;
+}
+
+.team-heading p {
+  font-size: 1.2rem;
+  color: #e6f7ff;
+  max-width: 600px;
+  margin: 0 auto 40px auto;
+  animation: fadeInUp 1s ease-in-out;
+}
+
+/* Team Container */
+.team-container {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 20px;
+  animation: fadeIn 1.5s ease-in-out;
+}
+
+/* Team Member Cards */
+.team-member {
+  width: 250px;
+  perspective: 1000px;
+  transform: scale(1);
+  transition: transform 0.3s ease-in-out;
+}
+
+.team-member:hover {
+  transform: scale(0.8); /* Zoom-in effect on hover */
+}
+
+.card-inner {
+  position: relative;
+  width: 100%;
+  height: 350px;
+  transition: transform 0.6s ease-in-out;
+  transform-style: preserve-3d;
+}
+
+.card-inner:hover {
+  transform: rotateY(180deg); /* Flip effect on hover */
+}
+
+/* Card Front */
+.card-front,
+.card-back {
+  position: absolute;
+  width: 100%;
+  height: 100%;
+  backface-visibility: hidden;
+  border-radius: 10px; /* Rounded corners for cards */
+  overflow: hidden;
+}
+
+.card-front {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  background: #fff;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+  transform: rotateY(0deg);
+}
+
+.card-front img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.card-front h3 {
+  position: absolute;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.7); /* Semi-transparent background for contrast */
+  color: #fff;
+  width: 100%;
+  text-align: center;
+  font-size: 1.2rem;
+  font-weight: bold;
+  padding: 10px 0;
+  margin: 0;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  transition: all 0.3s ease-in-out;
+}
+
+.card-front:hover h3 {
+  background: rgba(255, 255, 255, 0.8); /* Hover effect for text background */
+  color: #007bff;
+  font-size: 1.4rem; /* Slightly larger font on hover */
+}
+
+/* Card Back */
+/* Card Back */
+.card-back {
+  background: #ffffff; /* Clean white background */
+  color: #333333; /* Neutral dark text color */
+  transform: rotateY(180deg);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 20px;
+  border-radius: 10px;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+  border: 1px solid #e0e0e0; /* Light border for a professional look */
+  transition: transform 0.6s ease, background 0.4s ease;
+}
+
+.card-back h3 {
+  font-size: 1.5rem;
+  font-weight: bold;
+  color: #007bff; /* Professional blue */
+  margin-bottom: 10px;
+  letter-spacing: 1px;
+  text-transform: uppercase;
+}
+
+.card-back p {
+  font-size: 1.1rem;
+  line-height: 1.5;
+  color: #555555;
+  text-align: center;
+  padding: 15px;
+  border: 1px solid #dcdcdc;
+  border-radius: 5px;
+  background: #f8f8f8;
+  box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.05);
+  transition: all 0.3s ease-in-out;
+}
+
+/* Smooth Hover Effects */
+.card-back:hover {
+  background: #f0f0f0; /* Slightly darker background on hover */
+  box-shadow: 0 6px 12px rgba(0, 0, 0, 0.15); /* More pronounced shadow */
+}
+
+.card-back:hover p {
+  color: #333333; /* Darker text color on hover */
+  background: #ffffff; /* Brighten background on hover */
+  border-color: #007bff; /* Blue border on hover */
+}
+
+/* Animations */
+.card-back h3 {
+  animation: fadeIn 0.8s ease;
+}
+
+.card-back p {
+  animation: fadeInUp 1s ease;
+}
+
+@keyframes fadeIn {
+  0% {
+    opacity: 0;
+    transform: translateY(-10px);
+  }
+  100% {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes fadeInUp {
+  0% {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  100% {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* Flip Card Fix */
+.card-inner {
+  transition: transform 0.6s ease-in-out;
+  transform-style: preserve-3d;
+}
+
+.team-member:hover .card-inner {
+  transform: rotateY(180deg);
+}
