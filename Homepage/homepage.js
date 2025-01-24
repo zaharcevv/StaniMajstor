@@ -36,3 +36,17 @@ document.addEventListener("DOMContentLoaded", function () {
       console.error("loginIcon not found");
   }
 });
+
+window.addEventListener('load', function () {
+  // Wait for 1.5 seconds to allow preloader to finish
+  setTimeout(function () {
+      // Add transition to preloader to fade out
+      document.getElementById('preloader').style.opacity = '0'; // Make preloader fade out
+      document.getElementById('preloader').style.visibility = 'hidden'; // Hide it completely after fading
+      document.body.style.overflow = 'auto'; // Allow scrolling after loading
+      
+      // Trigger the page content to smoothly fade in
+      document.querySelector('.hero').classList.add('visible'); // Add class to trigger smooth transition
+  }, 1500); // The preloader will last for 1.5 seconds before fading out
+});
+
