@@ -1,0 +1,211 @@
+
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+  scroll-behavior: smooth;
+}
+
+body {
+  font-family: 'Arial', sans-serif;
+  background: linear-gradient(to bottom, #e3f7ff, #80cafa);
+  color: #333;
+  overflow-x: hidden;
+}
+
+/*NAVBARRR!!!!!!*/
+.header {
+  background: linear-gradient(to right, #60aefb, #2b8df0);
+  color: white;
+  text-align: center;
+  padding: 20px 0;
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.3);
+  position: sticky;
+  top: 0;
+  z-index: 1000;
+}
+
+.header .logo img {
+  width: 50px;
+  animation: rotate 4s linear infinite;
+}
+
+.header h1 {
+  font-size: 2.5rem;
+  margin: 10px 0;
+  text-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
+}
+
+.header p {
+  font-size: 1.2rem;
+  font-style: italic;
+}
+
+.navbar ul {
+  display: flex;
+  justify-content: center;
+  list-style: none;
+  margin-top: 15px;
+}
+
+.navbar ul li {
+  margin: 0 15px;
+}
+
+.navbar ul li a {
+  text-decoration: none;
+  color: white;
+  font-size: 1rem;
+  padding: 5px 15px;
+  border: 2px solid transparent;
+  transition: all 0.3s;
+}
+
+.navbar ul li a:hover {
+  border: 2px solid white;
+  border-radius: 5px;
+}
+
+@keyframes rotate {
+  0% {
+      transform: rotate(0deg);
+  }
+  100% {
+      transform: rotate(360deg);
+  }
+}
+/*SECTIONSS*/
+.section {
+  padding: 60px 20px;
+  text-align: center;
+}
+.section_abUs{
+  display: flex;
+  text-align: center;
+  gap: 60px;
+  padding: 110px;
+}
+.header_sections{
+  font-size: 2rem;
+  margin-bottom: 20px;
+  color: #0056b3;
+  text-transform: uppercase;
+  animation: fadeIn 2s ease;
+  border-bottom: 10px dotted white;
+}
+
+p {
+  max-width: 800px;
+  margin: 0 auto 20px;
+  font-size: 1.1rem;
+  line-height: 1.8;
+  animation: slideUp 2s ease;
+}
+
+@keyframes fadeIn {
+  from {
+      opacity: 0;
+  }
+  to {
+      opacity: 1;
+  }
+}
+
+@keyframes slideUp {
+  from {
+      transform: translateY(20px);
+      opacity: 0;
+  }
+  to {
+      transform: translateY(0);
+      opacity: 1;
+  }
+}
+
+/*TEAM SECTION!!!!!!!!!!!!!!*/
+.team-grid {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 30px;
+}
+
+.team-member {
+  width: 250px;
+  height: 300px;
+  perspective: 1000px; /* Enables the 3D effect */
+}
+
+.card-inner {
+  position: relative;
+  width: 100%;
+  height: 100%;
+  transform-style: preserve-3d;
+  transition: transform 0.8s;
+}
+
+.team-member:hover .card-inner {
+  transform: rotateY(180deg); /* Rotates the card when hovered */
+}
+
+.card-front, .card-back {
+  position: absolute;
+  width: 100%;
+  height: 100%;
+  backface-visibility: hidden; /* Hides the back when front is visible */
+  border-radius: 10px;
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+}
+
+.card-front {
+  background: white;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 20px;
+  text-align: center;
+}
+
+.card-front img {
+  border-radius: 50%;
+  width: 120px;
+  height: 120px;
+  margin-bottom: 15px;
+}
+
+.card-back {
+  background: #2b8df0;
+  color: white;
+  transform: rotateY(180deg);
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  padding: 20px;
+  text-align: center;
+  border-radius: 10px;
+}
+
+
+@keyframes zoomIn {
+  from {
+      transform: scale(0.8);
+      opacity: 0;
+  }
+  to {
+      transform: scale(1);
+      opacity: 1;
+  }
+}
+
+/* FOOTER!!!!!!!*/
+.footer {
+  background: #2b8df0;
+  color: white;
+  text-align: center;
+  padding: 20px 0;
+  margin-top: 40px;
+  font-size: 1rem;
+  box-shadow: 0 -4px 10px rgba(0, 0, 0, 0.3);
+}
