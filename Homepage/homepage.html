@@ -7,19 +7,15 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
     <link rel="stylesheet" href="homepage.css">
 </head>
-
 <body>
-
-    <header>
-
-        
-        <div class="logo">
+    <header>       
+        <div class="logo" >
             <img src="logo-transparent.png" alt="Logo">
         </div>
         <nav class="desktop-nav">
-            <a href="#">Home</a>
+            <a href="#hero">Home</a>
             <a href="#categories">Services</a>
-            <a href="#team">Our Team</a>
+            <a href="#team">Our Vision</a>
             <a href="#apply">Become a Master</a>
         </nav>
         <div class="auth">
@@ -29,6 +25,8 @@
             <i class="fas fa-bars"></i>
         </div>
     </header>
+
+    
      
     <div id="preloader">
         <div class="dots">
@@ -39,28 +37,36 @@
     </div>
     
     
-    <div class="hero">
-        <h1>Find the Perfect Master <br> for any Job, Anytime.</h1>
-        <div class="search-bar">
-            <input type="text" placeholder="What service do you need?" id="searchInput">
-            <button>
-                <i class="fas fa-search"></i>
-            </button>
-        </div>
-        <div class="wave">
-            <svg viewBox="0 0 1200 160" preserveAspectRatio="none">
-                <path d="M0,120 C320,200 800,40 1200,160 L1200,200 L0,200 Z" fill="#565b61"></path>
-            </svg>
-        </div>
+    <div class="hero" id="hero">
+      <div class="hero-content">
+          <h1>Find the Perfect Master <br> for any Job, Anytime.</h1>
+          <div class="search-bar">
+              <input type="text" placeholder="What service do you need?" id="searchInput">
+              <button>
+                  <i class="fas fa-search"></i>
+              </button>
+          </div>
+      </div>
+      <div class="hero-image"></div>
+      <div class="wave">
+          <svg viewBox="0 0 1200 160" preserveAspectRatio="none">
+              <path d="M0,120 C320,200 800,40 1200,160 L1200,200 L0,200 Z" fill="#565b61"></path>
+          </svg>
+      </div>
+  
+      <div class="fas fa-cog nut1"></div>
+      <div class="fas fa-cog nut2"></div>
+  </div>
+  
 
-    <div class="fas fa-cog nut1"></div>
-    <div class="fas fa-cog nut2"></div>
 
+  <section id="categories" class="categories">
+    <div class="section-header">
+        <h1>Our Services</h1>
+        <p>Explore the various services offered by skilled professionals. Find the right expert for your needs!</p>
     </div>
 
-    
-    
-    <section id="categories" class="categories">
+    <div class="cards-container">
         <div class="card"><i class="fas fa-plug"></i><h3>Electrician</h3></div>
         <div class="card"><i class="fas fa-wrench"></i><h3>Plumber</h3></div>
         <div class="card"><i class="fas fa-paint-roller"></i><h3>Painter</h3></div>
@@ -70,7 +76,10 @@
         <div class="card"><i class="fas fa-cogs"></i><h3>Engineer</h3></div>
         <div class="card"><i class="fas fa-door-open"></i><h3>Installer</h3></div>
         <div class="card"><i class="fas fa-water"></i><h3>Cleaner</h3></div>
-    </section>
+    </div>
+</section>
+
+
     
     <section id="apply" class="apply-section">
         <div class="content">
@@ -112,81 +121,6 @@
             
         </div>
     </section>
-    
-
-    
-
-    
-
-<section id="team" class="team-section">
-    <div class="team-heading">
-      <h2>Meet Our Team</h2>
-      <p>We are a passionate group of professionals dedicated to connecting you with the best masters in your area. Our team works hard to ensure a seamless experience for both clients and professionals.</p>
-    </div>
-  
-    <div class="team-container">
-      <div class="team-member">
-        <div class="card-inner">
-          <div class="card-front">
-            <img src="jovan.jpg" alt="">
-            <h3>Јован Најдановски</h3>
-          </div>
-          <div class="card-back">
-            <h3>Јован Најдановски</h3>
-            <p>Lorem ipsum dolor sit amet, consectetur adipisicing elit. Accusamus, aperiam? Corporis quia, omnis qui, quisqua.</p>
-          </div>
-        </div>
-      </div>
-      <div class="team-member">
-        <div class="card-inner">
-          <div class="card-front">
-            <img src="tomce.jpg" alt="">
-            <h3>Владимир Герасимовски</h3>
-          </div>
-          <div class="card-back">
-            <h3>Владимир Герасимовски</h3>
-            <p>Lorem ipsum dolor sit amet, consectetur adipisicing elit. Accusamus, aperiam? Corporis quia, omnis qui, quisqua.</p>
-          </div>
-        </div>
-      </div>
-      <div class="team-member">
-        <div class="card-inner">
-          <div class="card-front">
-            <img src="tomce.jpg" alt="">
-            <h3>Томче Бошев</h3>
-          </div>
-          <div class="card-back">
-            <h3>Томче Бошев</h3>
-            <p>Lorem ipsum dolor sit amet, consectetur adipisicing elit. Accusamus, aperiam? Corporis quia, omnis qui, quisqua.</p>
-          </div>
-        </div>
-      </div>
-      <div class="team-member">
-        <div class="card-inner">
-          <div class="card-front">
-            <img src="tomce.jpg" alt="">
-            <h3>Христијан Захарчев</h3>
-          </div>
-          <div class="card-back">
-            <h3>Христијан Захарчев</h3>
-            <p>Lorem ipsum dolor sit amet, consectetur adipisicing elit. Accusamus, aperiam? Corporis quia, omnis qui, quisqua.</p>
-          </div>
-        </div>
-      </div>
-      <div class="team-member">
-        <div class="card-inner">
-          <div class="card-front">
-            <img src="sara.jpg" alt="">
-            <h3>Сара Чагоровска</h3>
-          </div>
-          <div class="card-back">
-            <h3>Сара Чагоровска</h3>
-            <p>Lorem ipsum dolor sit amet, consectetur adipisicing elit. Accusamus, aperiam? Corporis quia, omnis qui, quisqua.</p>
-          </div>
-        </div>
-      </div>
-    </div>
-  </section>
 
   <section id="mobile-app" class="mobile-app-section">
     <div class="content">
@@ -205,13 +139,6 @@
   </section>
   
   
-  <section id="cta" class="cta-banner">
-    <div class="cta-content">
-        <h2>Find the Best Masters for Your Needs!</h2>
-        <p>Get started today and connect with top-rated professionals in your area. Your perfect match is just a click away.</p>
-        <a href="#categories" class="cta-button">Explore Services</a>
-    </div>
-</section>
 
 
   
