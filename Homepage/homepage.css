@@ -111,7 +111,21 @@ color: #ffc107;
   padding: 200px 20px;
   background-color: #212529;
   color: white;
-  position: relative;  
+  position: relative;
+  opacity: 0;
+  transform: translateY(20px);
+  transition: opacity 1.5s ease-out, transform 1.5s ease-out; /* Smooth opacity and translation */
+  background: 
+    linear-gradient(to left, rgba(33, 37, 41, 0.8), rgba(33, 37, 41, 0.8)), 
+    url('cleaner.png') no-repeat left center, /* Add image on the left */
+    url('shkl.png') no-repeat right center; /* Add image on the right */
+  background-size: contain, contain, contain; /* Ensure images fit nicely */
+  background-blend-mode: overlay; /* Apply transparency to both images */
+}
+
+.hero.visible {
+  opacity: 1;
+  transform: translateY(0);
 }
 
 .hero h1 {
@@ -177,6 +191,25 @@ color: #ffc107;
   display: block;
   width: 100%;
   height: 100%; /* Ensures it fills the container */
+}
+
+@media (max-width: 768px) {
+  .hero {
+    background: 
+      linear-gradient(to left, rgba(33, 37, 41, 0.8), rgba(33, 37, 41, 0.8)), 
+      url('kgj.png') no-repeat center center; /* Show only one image */
+    background-size: auto 90%, cover; /* Scale the single image nicely */
+    padding: 150px 10px; /* Adjust padding */
+  }
+
+  .hero h1 {
+    font-size: 2.5rem; /* Reduce text size for smaller screens */
+    margin-bottom: 50px;
+  }
+
+  .hero .search-bar {
+    max-width: 90%; /* Ensure the search bar fits smaller screens */
+  }
 }
 
 .categories {
@@ -581,21 +614,22 @@ text-align: center;
 
 
 
+/* Base Section Styles */
 .mobile-app-section {
   background: linear-gradient(to right, #212529, #343a40);
   color: white;
-  padding: 70px 15px; /* Reduced padding for a smaller section */
+  padding: 70px 15px;
   display: flex;
   justify-content: center;
   align-items: center;
-  margin: 100px 120px; /* Smaller margin for a compact look */
-  border-radius: 40px;
+  margin: 50px 20px; /* Adjusted margin for better responsiveness */
+  border-radius: 20px;
   position: relative;
-  overflow: hidden; /* Contain animations within the section */
+  overflow: hidden;
   flex-wrap: wrap;
 }
 
-/* Animated background bubbles */
+/* Animated Background Elements */
 .mobile-app-section::before,
 .mobile-app-section::after {
   content: "";
@@ -627,7 +661,7 @@ text-align: center;
   }
 }
 
-/* Add animated diagonal stripes in the background */
+/* Stripes Animation */
 .mobile-app-section::after {
   content: "";
   position: absolute;
@@ -659,31 +693,32 @@ text-align: center;
   }
 }
 
+/* Content Styles */
 .mobile-app-section .content {
   display: flex;
   flex-wrap: wrap;
-  max-width: 1000px; /* Reduced width for a smaller section */
+  max-width: 1000px;
   align-items: center;
   gap: 40px;
   position: relative;
-  z-index: 2; /* Keep content above animations */
+  z-index: 2;
 }
 
 .mobile-app-section .text-content {
   flex: 1;
   max-width: 500px;
-  text-align: center; /* Center-align for smaller screens */
+  text-align: center;
 }
 
 .mobile-app-section .text-content h1 {
-  font-size: 2.5rem; /* Slightly smaller title */
+  font-size: 2.5rem;
   margin-bottom: 15px;
   color: #ffc107;
   animation: fadeIn 1.5s ease-in-out;
 }
 
 .mobile-app-section .text-content p {
-  font-size: 1.2rem; /* Reduced paragraph size */
+  font-size: 1.2rem;
   margin-bottom: 25px;
   line-height: 1.5;
   animation: fadeIn 1.5s ease-in-out 0.5s;
@@ -700,6 +735,7 @@ text-align: center;
   }
 }
 
+/* Button Styles */
 .mobile-app-section .app-buttons {
   display: flex;
   justify-content: center;
@@ -711,9 +747,9 @@ text-align: center;
   text-decoration: none;
   background: #ffc107;
   color: #212529;
-  padding: 18px 28px; /* Increased button size */
+  padding: 18px 28px;
   border-radius: 12px;
-  font-size: 1.1rem; /* Slightly larger text */
+  font-size: 1.1rem;
   font-weight: bold;
   display: flex;
   align-items: center;
@@ -739,27 +775,49 @@ text-align: center;
   }
 }
 
+/* QR Code Styles */
 .mobile-app-section .qr-code-content {
   flex: 1;
   text-align: center;
-  margin-top: 15px; /* Adjust spacing for smaller screens */
+  margin-top: 15px;
 }
 
 .mobile-app-section .qr-code-img {
-  max-width: 80%; /* Ensure QR code scales */
+  max-width: 80%;
   height: auto;
   border-radius: 15px;
   box-shadow: 0 6px 12px rgba(0, 0, 0, 0.3);
   animation: bounce 1.5s ease-in-out infinite;
 }
 
+@keyframes bounce {
+  0%, 100% {
+    transform: translateY(0);
+  }
+  50% {
+    transform: translateY(-10px);
+  }
+}
+
 /* Responsive Adjustments */
 @media (max-width: 768px) {
   .mobile-app-section {
-    flex-direction: column;
+    flex-direction: column; /* Stack items vertically */
     padding: 40px 15px;
+    margin: 20px 10px;
   }
 
+  /* Ensure QR Code moves below the text content */
+  .mobile-app-section .qr-code-content {
+    order: 2; /* Push QR code below the text content */
+    margin-top: 30px; /* Add spacing above the QR code */
+  }
+
+  .mobile-app-section .text-content {
+    order: 1; /* Keep text content on top */
+  }
+
+  /* Adjust Text Content */
   .mobile-app-section .text-content h1 {
     font-size: 2rem;
   }
@@ -768,11 +826,13 @@ text-align: center;
     font-size: 1rem;
   }
 
+  /* Adjust Button Sizes */
   .mobile-app-section .app-buttons a {
     padding: 15px 25px;
     font-size: 1rem;
   }
 
+  /* Scale QR Code */
   .mobile-app-section .qr-code-img {
     max-width: 70%;
   }
