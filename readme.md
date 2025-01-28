@@ -206,5 +206,3 @@
 5. **Seller Dashboard**
    - Mobile: Scrollable tabs.
    - Desktop: Sidebar navigation.
-
-Let me know if you’d like a code example for a specific mobile-first page! 
