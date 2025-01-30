@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Account Settings</title>
+  <link rel="stylesheet" href="test.css">
+</head>
+<body>
+  <div class="account-settings-container">
+    <aside class="sidebar">
+        <div class="picture-placeholder" id="profilePicture">
+          </div>
+          <nav class="nav-links">
+            <a href="#" class="active" id="home">
+                <img src="assets/home2.png" alt="Dashboard Icon">
+                Dashboard
+            </a>
+            <a href="#" id="account">
+                <img src="assets/user.png" alt="Account Details Icon">
+                Account Details
+            </a>
+            <a href="#" id="password">
+                <img src="assets/lock.png" alt="Change Password Icon">
+                Change Password
+            </a>
+            <a href="#" id="logout">
+                <img src="assets/logout.png" alt="Logout Icon">
+                Logout
+            </a>
+        </nav>
+        
+          
+    </aside>
+    <main class="settings-content">
+      <h1>Account Settings</h1>
+      <form class="settings-form">
+        <div class="form-group">
+          <label for="email">Email address</label>
+          <input type="email" id="email" value="support@profilepress.net">
+        </div>
+        <div class="form-group">
+          <label for="first-name">First name</label>
+          <input type="text" id="first-name" value="John">
+        </div>
+        <div class="form-group">
+          <label for="last-name">Last name</label>
+          <input type="text" id="last-name" value="Doe">
+        </div>
+        <div class="form-group">
+          <label for="birthdate">Phone Number</label>
+          <input type="text" id="phonenumber" value="071 222 333">
+        </div>
+        <div class="form-group">
+          <label for="facebook">Facebook</label>
+          <input type="url" id="facebook" value="https://www.facebook.com/profilepress">
+        </div>
+        <div class="form-group">
+          <label for="twitter">Twitter</label>
+          <input type="url" id="twitter" value="https://twitter.com/profilepress">
+        </div>
+      </form>
+    </main>
+  </div>
+</body>
+</html>
