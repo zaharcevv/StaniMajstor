@@ -1,28 +1,74 @@
 <script setup>
-import { useRoute, useRouter } from "vue-router";
-import DefaultLayout from "@/layouts/DefaultLayout.vue";
-// import { ref } from "vue";
+import { ref, computed, onMounted } from "vue"
+import { useRoute, useRouter } from "vue-router"
+import { getDoc, doc, getDocs, query, collection, where } from "firebase/firestore"
+import { db } from "@/firebase"
+import DefaultLayout from "@/layouts/DefaultLayout.vue"
 
-const route = useRoute();
-const router = useRouter();
+const route = useRoute()
+const router = useRouter()
 
-const goBack = () => {
-  router.push("/services");
-};
-
-const availability = "Онлајн"; // Example: Онлајн / Зафатен / Недостапен
-
-const reviews = [
-  { name: "Ана", rating: 5, comment: "Одличен мајстор, многу професионален!" },
-  { name: "Игор", rating: 4, comment: "Задоволен сум од услугата. Препорачувам!" }
-];
+const service = ref(null)
+const userInfo = ref(null)
+const loading = ref(true)
 
 const portfolioImages = [
   new URL('@/assets/workers.png', import.meta.url).href,
   new URL('@/assets/workers.png', import.meta.url).href
-];
+]
 
-const averageRating = reviews.reduce((a, b) => a + b.rating, 0) / reviews.length;
+const reviews = [
+  { name: "Ана", rating: 5, comment: "Одличен мајстор, многу професионален!" },
+  { name: "Игор", rating: 4, comment: "Задоволен сум од услугата. Препорачувам!" }
+]
+
+const averageRating = reviews.reduce((a, b) => a + b.rating, 0) / reviews.length
+const availability = "Онлајн"
+
+const goBack = () => {
+  router.push("/services")
+}
+
+const fallbackImage = new URL('@/assets/lok.png', import.meta.url).href
+
+const profileImage = computed(() => {
+  return userInfo.value?.image || fallbackImage
+})
+
+onMounted(async () => {
+  const serviceId = route.params.id
+  if (!serviceId) return
+
+  try {
+    // Get the service
+    const serviceDoc = await getDoc(doc(db, "services", serviceId))
+    if (!serviceDoc.exists()) return
+
+    service.value = { id: serviceDoc.id, ...serviceDoc.data() }
+
+    // Get the user info
+    const userQuery = query(collection(db, "users"), where("uid", "==", service.value.userId))
+    const userSnap = await getDocs(userQuery)
+
+    if (!userSnap.empty) {
+      userInfo.value = userSnap.docs[0].data()
+
+      // Try to load profile picture
+      const profilePicDoc = await getDoc(doc(db, "userProfilePictures", service.value.userId))
+      if (profilePicDoc.exists()) {
+        const profileData = profilePicDoc.data()
+        if (profileData.profilePicture) {
+          userInfo.value.image = profileData.profilePicture
+        }
+      }
+    }
+  } catch (err) {
+    console.error("Failed to load service:", err)
+  } finally {
+    loading.value = false
+  }
+})
+
 </script>
 
 <template>
@@ -33,11 +79,11 @@ const averageRating = reviews.reduce((a, b) => a + b.rating, 0) / reviews.length
           <v-col cols="12" md="8" lg="6">
             <div class="profile-box">
               <v-avatar size="130" class="avatar-img">
-                <v-img :src="route.query.image" />
+                <v-img :src="profileImage" />
               </v-avatar>
-              <h2 class="name">{{ route.query.name }} {{ route.query.lastName }}</h2>
-              <p class="job">{{ route.query.job }}</p>
-              <p class="location">📍 {{ route.query.location }}</p>
+              <h2 class="name">{{ userInfo?.firstName }} {{ userInfo?.lastName }}</h2>
+              <p class="job">{{ service?.service }}</p>
+              <p class="location">📍 {{ userInfo?.city || 'Непознато' }}</p>
               <span class="badge" :class="availability.toLowerCase()">{{ availability }}</span>
             </div>
 
@@ -47,14 +93,19 @@ const averageRating = reviews.reduce((a, b) => a + b.rating, 0) / reviews.length
             </div>
 
             <div class="section">
+              <h3>Oпис на услугата</h3>
+              <p>{{ service?.description || "Описот не е достапен." }}</p>
+            </div>
+
+            <div class="section">
               <h3>Биографија</h3>
               <p>{{ route.query.description || "Описот не е достапен." }}</p>
             </div>
 
             <div class="section">
-              <h3>Услуги</h3>
+              <h3>Други услуги</h3>
               <ul class="services-list">
-                <li v-for="service in route.query.services || ['Не е наведено']" :key="service">🔧 {{ service }}</li>
+                <li v-for="s in service?.services || ['Не е наведено']" :key="s">🔧 {{ s }}</li>
               </ul>
             </div>
 
@@ -69,8 +120,8 @@ const averageRating = reviews.reduce((a, b) => a + b.rating, 0) / reviews.length
 
             <div class="section">
               <h3>Контакт информации</h3>
-              <p>📞 {{ route.query.phone || 'Нема информација' }}</p>
-              <p>✉️ {{ route.query.email || 'Нема информација' }}</p>
+              <p>📞 {{ userInfo?.phone || 'Нема информација' }} </p>
+              <p>✉️ {{ userInfo?.email || 'Нема информација' }} </p>
               <p>🌐 Профил: <a :href="route.query.website || '#'" target="_blank" class="text-link">Веб страна</a></p>
             </div>
 
