@@ -3,8 +3,7 @@ import HomeView from '@/views/HomeView.vue';
 import FavouriteMaster from '@/views/FavouriteMaster.vue';
 import ServicesView from '@/views/ServicesView.vue';
 import ApplyView from '@/views/ApplyView.vue';
-import LoginSection from '@/components/Auth/LoginSection.vue';
-import RegisterSection from '@/components/Auth/RegisterSection.vue';
+
 import NextForm from '@/components/sellers/NextForm.vue';
 import EditProfile from '@/components/Auth/EditProfile.vue';
 import SellerDashboard from '@/components/sellers/SellerDashboard.vue';
@@ -14,6 +13,10 @@ import ProfilePicturePage from '@/components/sellers/ProfilePicture.vue';
 import UserProfile from '@/components/Auth/UserProfile.vue'
 import Settings from '@/components/common/Settings.vue';
 import HowItWorks from '@/components/HowItWorks/howItWorks.vue'
+
+import RegisterSection from '@/components/Auth/RegisterSection.vue';
+import LoginSection from '@/components/Auth/LoginSection.vue';
+import ResetPassword from '@/components/Auth/ResetPassword.vue';
 import ForgotPassword from '@/components/Auth/ForgotPassword.vue';
 
 const router = createRouter({
@@ -34,6 +37,7 @@ const router = createRouter({
     { path: '/user-profile', component: UserProfile },
     { path: '/settings', component: Settings },
     { path: '/how-it-works', component: HowItWorks},
+    { path: '/reset-password', component: ResetPassword},
     { path: '/forgot-password', component: ForgotPassword}
   ],
 });

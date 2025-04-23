@@ -4,41 +4,26 @@
       <div class="overlay"></div>
       <v-container class="form-container" fluid>
         <v-card class="form-card" elevation="10">
-          <v-card-title class="text-center text-yellow-darken-2 text-h5 font-weight-bold">
-            🔐 Промени лозинка
+          <v-card-title class="text-center text-yellow-darken-2 text-h5 font-weight-bold mb-3">
+            Заборавена лозинка
           </v-card-title>
 
-          <v-form ref="passwordForm" @submit.prevent="changePassword" class="px-4">
+          <v-form @submit.prevent="sendResetEmail" class="px-4">
             <v-text-field
-              v-model="newPassword"
-              :type="showNew ? 'text' : 'password'"
-              label="Нова лозинка"
+              v-model="email"
+              label="Емаил адреса"
+              type="email"
               color="warning"
               variant="outlined"
               density="comfortable"
-              :append-inner-icon="showNew ? 'mdi-eye-off' : 'mdi-eye'"
-              @click:append-inner="showNew = !showNew"
-              class="mb-4"
-              :rules="[
-                v => !!v || 'Внеси лозинка',
-                v => v.length >= 6 || 'Минимум 6 карактери'
-              ]"
+              required
+              class="mb-1"
             />
 
-            <v-text-field
-              v-model="confirmPassword"
-              :type="showConfirm ? 'text' : 'password'"
-              label="Потврди лозинка"
-              color="warning"
-              variant="outlined"
-              density="comfortable"
-              :append-inner-icon="showConfirm ? 'mdi-eye-off' : 'mdi-eye'"
-              @click:append-inner="showConfirm = !showConfirm"
-              :rules="[
-                v => !!v || 'Потврди ја лозинката',
-                v => v === newPassword || 'Лозинките не се совпаѓаат'
-              ]"
-            />
+            <!-- Error or Success Message -->
+            <div v-if="errorMessage" class="error-message">
+              {{ errorMessage }}
+            </div>
 
             <v-btn
               type="submit"
@@ -48,7 +33,7 @@
               class="mt-4 font-weight-bold text-black"
               :loading="loading"
             >
-              🔄 Ажурирај лозинка
+              Испрати линк за ресет
             </v-btn>
           </v-form>
         </v-card>
@@ -64,12 +49,10 @@
 
 <script setup>
 import { ref } from 'vue'
-import { getAuth, updatePassword } from 'firebase/auth'
+import { getAuth, sendPasswordResetEmail } from 'firebase/auth'
 
-const newPassword = ref('')
-const confirmPassword = ref('')
-const showNew = ref(false)
-const showConfirm = ref(false)
+const email = ref('')
+const errorMessage = ref('')
 const loading = ref(false)
 
 const snackbar = ref({
@@ -78,38 +61,23 @@ const snackbar = ref({
   color: 'success'
 })
 
-const changePassword = async () => {
+const sendResetEmail = async () => {
   const auth = getAuth()
-  const user = auth.currentUser
-
-  if (!newPassword.value || newPassword.value !== confirmPassword.value) {
-    snackbar.value = {
-      show: true,
-      message: '❌ Лозинките не се совпаѓаат.',
-      color: 'error'
-    }
-    return
-  }
-
+  errorMessage.value = ''
   try {
     loading.value = true
-    await updatePassword(user, newPassword.value)
-    newPassword.value = ''
-    confirmPassword.value = ''
+    await sendPasswordResetEmail(auth, email.value)
     snackbar.value = {
       show: true,
-      message: '✅ Лозинката е успешно променета!',
+      message: '✅ Провери го емаилот за линк за ресет.',
       color: 'success'
     }
+    email.value = ''
   } catch (error) {
-    console.error('Error updating password:', error)
-    snackbar.value = {
-      show: true,
-      message: error.code === 'auth/requires-recent-login'
-        ? 'ℹ️ Најавете се повторно за да смените лозинка.'
-        : '❌ Грешка при промена на лозинката.',
-      color: error.code === 'auth/requires-recent-login' ? 'info' : 'error'
-    }
+    console.error(error)
+    errorMessage.value = '❌ ' + (error.code === 'auth/user-not-found'
+      ? 'Корисник со таа емаил адреса не постои.'
+      : 'Настана грешка. Пробај повторно.')
   } finally {
     loading.value = false
   }
@@ -148,5 +116,12 @@ const changePassword = async () => {
   max-width: 420px;
   width: 100%;
   color: white;
+}
+.error-message {
+  margin-top: -18px;
+  margin-bottom: 24px;
+  font-size: 0.9rem;
+  color: #ff5252;
+  font-weight: 500;
 }
 </style>

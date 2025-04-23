@@ -1,68 +1,51 @@
 <template>
   <v-container class="profile-wrapper" fluid>
     <v-row justify="center">
-      <v-col cols="12" md="8" lg="6">
-        <v-card class="profile-card" elevation="12">
-          <v-card-text class="profile-content">
-            <div class="avatar-section">
-              <v-avatar size="120" class="avatar-shadow">
+      <v-col cols="12" md="7" lg="5">
+        <v-card class="profile-card" elevation="8">
+          <v-card-text>
+            <div class="profile-header">
+              <v-avatar size="100">
                 <v-img :src="user?.profilePicture || defaultImage" cover />
               </v-avatar>
-              <h2 class="username" v-if="user">{{ user.firstName }} {{ user.lastName }}</h2>
-              <p class="user-subtitle" v-if="user">{{ user.email }}</p>
+              <div class="profile-name">
+                <h2>{{ user?.firstName }} {{ user?.lastName }}</h2>
+                <p>{{ user?.email }}</p>
+              </div>
             </div>
 
-            <v-divider class="my-5" />
+            <v-divider class="my-4" />
+
+            <v-row class="mb-4" dense>
+              <v-col cols="12" sm="6">
+                <div class="profile-field">
+                  <label>Град</label>
+                  <p>{{ user?.city || '—' }}</p>
+                </div>
+              </v-col>
+              <v-col cols="12" sm="6">
+                <div class="profile-field">
+                  <label>Телефон</label>
+                  <p>{{ user?.phone || '—' }}</p>
+                </div>
+              </v-col>
+            </v-row>
 
             <v-row dense>
               <v-col cols="12" sm="6">
-                <div class="info-box">
-                  <p class="info-label">📍 Град</p>
-                  <p class="info-value">{{ user?.city || '—' }}</p>
-                </div>
+                <v-btn block color="#ff9800" variant="flat" style="color: white;" @click="goToEditProfile">Ажурирај</v-btn>
               </v-col>
-
               <v-col cols="12" sm="6">
-                <div class="info-box">
-                  <p class="info-label">📞 Телефон</p>
-                  <p class="info-value">{{ user?.phone || '—' }}</p>
-                </div>
+                <v-btn block color="error" variant="flat" @click="logout">Одјави се</v-btn>
               </v-col>
             </v-row>
-
-            <v-row class="mt-5" dense>
-              <v-col cols="12" sm="6">
-                <v-btn
-                  block
-                  color="yellow-darken-2"
-                  class="text-black font-weight-bold animated-btn"
-                  @click="goToEditProfile"
-                >
-                  ✏️ Ажурирај
-                </v-btn>
-              </v-col>
-              <v-col cols="12" sm="6">
-                <v-btn
-                  block
-                  color="red-darken-3"
-                  class="text-white font-weight-bold animated-btn"
-                  @click="logout"
-                >
-                  🚪 Одјави се
-                </v-btn>
-              </v-col>
-            </v-row>
-          </v-card-text>
-
-          <v-card-text class="text-center" v-if="!user">
-            <v-icon size="48" color="grey-lighten-1">mdi-account-off</v-icon>
-            <p class="text-grey-lighten-1 mt-2">Не сте најавени.</p>
           </v-card-text>
         </v-card>
       </v-col>
     </v-row>
   </v-container>
 </template>
+
 
 <script setup>
 import { ref, onMounted } from 'vue'
@@ -128,125 +111,56 @@ const goToEditProfile = () => {
 
 <style scoped>
 .profile-wrapper {
-  background: linear-gradient(135deg, #0e0e0e, #1a1a1a);
+  background-color: #0f0f0f;
   min-height: 100vh;
-  padding: 90px 20px;
+  padding: 80px 16px;
   display: flex;
   align-items: center;
   justify-content: center;
 }
 
 .profile-card {
-  background: rgba(255, 255, 255, 0.04);
-  border-radius: 24px;
-  backdrop-filter: blur(18px);
-  border: 1px solid rgba(255, 255, 255, 0.07);
-  box-shadow: 0 10px 32px rgba(0, 0, 0, 0.5);
-  transition: all 0.3s ease;
-}
-
-.profile-card:hover {
-  transform: translateY(-4px);
-  box-shadow: 0 16px 44px rgba(255, 193, 7, 0.2);
-}
-
-.profile-content {
-  padding: 48px 36px;
-}
-
-.avatar-section {
-  text-align: center;
-  margin-bottom: 28px;
-}
-
-.avatar-shadow {
-  border: 3px solid #ffc107;
-  box-shadow: 0 10px 30px rgba(255, 193, 7, 0.2);
-  transition: transform 0.4s ease;
-}
-
-.avatar-shadow:hover {
-  transform: scale(1.08);
-}
-
-.username {
-  font-size: 2rem;
-  font-weight: 800;
-  color: #ffc107;
-  margin-top: 16px;
-  text-shadow: 0 0 8px rgba(255, 193, 7, 0.25);
-}
-
-.user-subtitle {
-  font-size: 1.05rem;
-  color: #bbb;
-  margin-top: 4px;
-  font-weight: 400;
-}
-
-.v-divider {
-  opacity: 0.08;
-  border-color: #ffc107;
-}
-
-.info-box {
-  background: rgba(255, 255, 255, 0.02);
-  border: 1px solid rgba(255, 255, 255, 0.06);
-  padding: 16px 20px;
+  background-color: #ffffff0a;
   border-radius: 16px;
-  margin-bottom: 16px;
-  box-shadow: inset 0 0 10px rgba(255, 255, 255, 0.02);
+  padding: 24px;
+  backdrop-filter: blur(14px);
+  border: 1px solid rgba(255, 255, 255, 0.06);
 }
 
-.info-label {
-  font-size: 0.8rem;
+.profile-header {
+  display: flex;
+  align-items: center;
+  gap: 20px;
+}
+
+.profile-name h2 {
+  font-size: 1.6rem;
   font-weight: 600;
+  color: #fff;
+  margin: 0;
+}
+
+.profile-name p {
+  margin-top: 4px;
+  font-size: 0.95rem;
+  color: #ccc;
+}
+
+.profile-field label {
+  font-size: 0.75rem;
   color: #999;
+  font-weight: 500;
   text-transform: uppercase;
   letter-spacing: 0.5px;
-  margin-bottom: 6px;
+  margin-bottom: 4px;
+  display: block;
 }
 
-.info-value {
-  font-size: 1.1rem;
+.profile-field p {
+  font-size: 1rem;
   font-weight: 500;
-  color: #f1f1f1;
+  color: #f5f5f5;
+  margin: 0;
 }
 
-.animated-btn {
-  font-size: 0.95rem;
-  font-weight: 600;
-  border-radius: 12px;
-  padding: 14px;
-  transition: all 0.3s ease;
-  box-shadow: 0 6px 18px rgba(0, 0, 0, 0.3);
-}
-
-.animated-btn:hover {
-  transform: scale(1.05);
-  box-shadow: 0 12px 22px rgba(255, 193, 7, 0.25);
-}
-
-@media (max-width: 768px) {
-  .profile-content {
-    padding: 32px 20px;
-  }
-
-  .username {
-    font-size: 1.6rem;
-  }
-
-  .user-subtitle {
-    font-size: 0.95rem;
-  }
-
-  .info-value {
-    font-size: 1rem;
-  }
-
-  .animated-btn {
-    font-size: 0.9rem;
-    padding: 12px;
-  }
-}
 </style>

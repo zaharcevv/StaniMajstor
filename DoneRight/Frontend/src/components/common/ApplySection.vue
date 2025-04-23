@@ -1,14 +1,31 @@
 <script setup>
 import consImage from "@/assets/lok.png"
 import { useRouter } from "vue-router"
-import { ref } from "vue"
+import { ref, onMounted } from "vue"
+import { getAuth, onAuthStateChanged } from "firebase/auth"
 
 const router = useRouter()
 const isLoggedIn = ref(false)
+
+onMounted(() => {
+  const auth = getAuth()
+  onAuthStateChanged(auth, (user) => {
+    isLoggedIn.value = !!user
+  })
+})
+
+const handleJoinClick = () => {
+  if (isLoggedIn.value) {
+    router.push('/apply') // веќе логнат – оди директно на апликацијата
+  } else {
+    router.push('/register') // не е логнат – оди на регистрација
+  }
+}
+
 </script>
 
 <template>
-  <section v-if="!isLoggedIn" id="apply" class="apply-section">
+<section id="apply" class="apply-section">
     <div class="content">
       <div class="left-content">
         <div class="header">
@@ -19,10 +36,10 @@ const isLoggedIn = ref(false)
           Дали си професионалец кој сака да ја прошири својата кариера и да се поврзе со повеќе клиенти?
           Придружи се на нашата платформа денес и отклучи свет на можности!
         </p>
-        <button @click="router.push('/apply')">
-          Приклучи се сега
-          <font-awesome-icon :icon="['fas', 'arrow-right']" class="arrow-icon" />
-        </button>
+        <button @click="handleJoinClick">
+  Приклучи се сега
+  <font-awesome-icon :icon="['fas', 'arrow-right']" class="arrow-icon" />
+</button>
       </div>
 
       <div class="right-content">

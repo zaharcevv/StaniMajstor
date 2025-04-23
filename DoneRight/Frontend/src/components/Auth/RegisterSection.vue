@@ -1,94 +1,175 @@
 <script setup>
-import { RouterLink, useRouter } from 'vue-router'
 import { ref } from 'vue'
-import { auth } from '@/firebase'
-import { createUserWithEmailAndPassword, updateProfile } from 'firebase/auth'
+import { useRouter } from 'vue-router'
+import { getAuth, createUserWithEmailAndPassword, updateProfile } from 'firebase/auth'
+import { doc, setDoc } from 'firebase/firestore'
+import { db } from '@/firebase'
 
 const router = useRouter()
 
-const name = ref("")
-const email = ref("")
-const password = ref("")
-const confirmPassword = ref("")
+const form = ref({
+  firstName: '',
+  lastName: '',
+  email: '',
+  phone: '',
+  city: '',
+  password: '',
+})
 
-const handleRegister = async () => {
-  if (password.value !== confirmPassword.value) {
-    alert("Passwords do not match!")
-    return
-  }
+const errorMessage = ref('')
+
+const cities = [
+  'Скопје', 'Битола', 'Тетово', 'Куманово', 'Прилеп', 'Охрид', 'Гостивар', 'Штип',
+  'Кавадарци', 'Велес', 'Кочани', 'Струмица', 'Гевгелија', 'Кичево', 'Струга',
+  'Неготино', 'Ресен', 'Кратово', 'Крива Паланка', 'Дебар', 'Берово', 'Делчево',
+  'Виница', 'Пробиштип', 'Свети Николе', 'Богданци', 'Валандово', 'Демир Хисар',
+  'Македонски Брод', 'Крушево', 'Пехчево', 'Радовиш'
+]
+
+const submitApplication = async () => {
+  errorMessage.value = ''
+
+  const { firstName, lastName, email, phone, city, password } = form.value
+
+  if (!firstName || !lastName || !email || !phone || !city || !password) {
+  errorMessage.value = 'Пополнете ги сите полиња.'
+  return
+}
+
+if (!email.includes('@')) {
+  errorMessage.value = 'Внеси валидна емајл адреса (пример: user@example.com).'
+  return
+}
+
+if (password.length < 6) {
+  errorMessage.value = 'Лозинката мора да има минимум 6 карактери.'
+  return
+}
+
+
+  const auth = getAuth()
 
   try {
-    // Create user with Firebase Auth
-    const userCredential = await createUserWithEmailAndPassword(auth, email.value, password.value)
+    const userCredential = await createUserWithEmailAndPassword(auth, email, password)
 
-    // Optionally update the display name
-    await updateProfile(userCredential.user, {
-      displayName: name.value
+    const user = userCredential.user
+
+    await updateProfile(user, {
+      displayName: `${firstName} ${lastName}`,
     })
 
-    alert("Registration successful!")
-    router.push('/login')
+    await setDoc(doc(db, 'users', user.uid), {
+      uid: user.uid,
+      email,
+      firstName,
+      lastName,
+      phone,
+      city,
+      isSeller: false,
+    })
 
+    router.push('/profile-picture')
   } catch (error) {
-    console.error("Registration error:", error)
-    alert(error.message)
+    if (error.code === 'auth/invalid-email') {
+      errorMessage.value = 'Внеси валидна емајл адреса (пример: user@example.com).'
+    } else {
+      errorMessage.value = 'Грешка при регистрација: ' + error.message
+    }
   }
+}
+
+const redirectToLogin = () => {
+  router.push('/login')
 }
 </script>
 
 <template>
-  <div class="auth-container">
-    <div class="auth-card">
-      <h2>Register</h2>
-      <form @submit.prevent="handleRegister">
-        <div class="form-group">
-          <label for="name">Name</label>
-          <input
-            type="text"
-            id="name"
-            v-model="name"
-            placeholder="Enter your name"
-            required
-          />
-        </div>
-        <div class="form-group">
-          <label for="email">Email</label>
-          <input
-            type="email"
-            id="email"
-            v-model="email"
-            placeholder="Enter your email"
-            required
-          />
-        </div>
-        <div class="form-group">
-          <label for="password">Password</label>
-          <input
-            type="password"
-            id="password"
-            v-model="password"
-            placeholder="Enter your password"
-            required
-          />
-        </div>
-        <div class="form-group">
-          <label for="confirmPassword">Confirm Password</label>
-          <input
-            type="password"
-            id="confirmPassword"
-            v-model="confirmPassword"
-            placeholder="Confirm your password"
-            required
-          />
-        </div>
-        <button type="submit" class="auth-button">Register</button>
-      </form>
-      <p class="auth-link">
-        Already have an account?
-        <RouterLink to="/login">Login</RouterLink>
-      </p>
+  <v-app>
+    <div class="background">
+      <div class="overlay"></div>
+      <v-container class="form-container" fluid>
+        <v-card class="form-card" elevation="10">
+          <v-card-title class="text-center text-yellow-darken-2 text-h5 font-weight-bold">
+            Стани Мајстор
+          </v-card-title>
+          <v-card-subtitle class="text-center mb-6 text-white">
+            Придружете се и споделете ги вашите знаења со нас.
+          </v-card-subtitle>
+
+          <v-form @submit.prevent="submitApplication" class="px-4">
+            <v-text-field v-model="form.firstName" label="Име" variant="outlined" density="comfortable" color="warning" class="mb-4" hide-details required />
+            <v-text-field v-model="form.lastName" label="Презиме" variant="outlined" density="comfortable" color="warning" class="mb-4" hide-details required />
+            <v-text-field v-model="form.email" label="Емајл адреса" type="email" variant="outlined" density="comfortable" color="warning" class="mb-4" hide-details required />
+            <v-text-field v-model="form.phone" label="Телефонски број" type="text" variant="outlined" density="comfortable" color="warning" class="mb-4" hide-details required />
+            <v-select v-model="form.city" :items="cities" label="Град" variant="outlined" density="comfortable" color="warning" class="mb-4" hide-details required />
+            <v-text-field v-model="form.password" label="Лозинка" type="password" variant="outlined" density="comfortable" color="warning" class="mb-5" hide-details required />
+
+            <!-- Error message -->
+            <p v-if="errorMessage" class="error-text">{{ errorMessage }}</p>
+
+            <div class="account-link text-white text-caption mb-5">
+              Имате веќе сметка?
+              <span class="link" @click="redirectToLogin">Логирајте се тука</span>
+            </div>
+
+            <v-btn type="submit" color="warning" block size="large" class="text-white font-weight-bold">
+              Продолжи
+            </v-btn>
+          </v-form>
+        </v-card>
+      </v-container>
     </div>
-  </div>
+  </v-app>
 </template>
 
-<style scoped src="@/assets/auth.css"></style>
+<style scoped>
+.background {
+  background-color: #212529;
+  height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  position: relative;
+}
+.overlay {
+  position: absolute;
+  width: 100%;
+  height: 100%;
+  backdrop-filter: blur(10px);
+  background: rgba(0, 0, 0, 0.3);
+  z-index: 0;
+}
+.form-container {
+  z-index: 1;
+  display: flex;
+  justify-content: center;
+}
+.form-card {
+  background-color: rgba(255, 255, 255, 0.05);
+  backdrop-filter: blur(12px);
+  border-radius: 16px;
+  padding: 30px 20px;
+  max-width: 420px;
+  width: 100%;
+  color: white;
+}
+.error-text {
+  color: #ff5252;
+  font-size: 0.9rem;
+  font-weight: 500;
+  margin-top: -8px;
+  margin-bottom: 16px;
+  text-align: center;
+}
+.account-link {
+  text-align: center;
+}
+.account-link .link {
+  color: #ffc107;
+  cursor: pointer;
+  font-weight: 600;
+}
+.account-link .link:hover {
+  text-decoration: underline;
+}
+</style>

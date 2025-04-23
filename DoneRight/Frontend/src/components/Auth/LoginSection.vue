@@ -41,11 +41,9 @@
               <span class="link text-caption" @click="redirectToForgot">Заборавена лозинка?</span>
             </div>
 
+            <p v-if="errorMessage" class="error-text text-center mb-3">{{ errorMessage }}</p>
 
-
-
-
-            <div class="account-link text-white text-caption mb-5">
+            <div class="account-link text-white text-caption mb-3">
               Немате профил?
               <span class="link" @click="redirectToRegister">Регистрирај се</span>
             </div>
@@ -64,10 +62,46 @@
           </v-form>
         </v-card>
 
-        <!-- Snackbar -->
-        <v-snackbar v-model="snackbar.show" :color="snackbar.color" timeout="3000">
-          {{ snackbar.message }}
-        </v-snackbar>
+<!-- Dialog after 5 failed attempts -->
+<v-dialog v-model="showResetDialog" max-width="420" transition="dialog-bottom-transition">
+  <v-card class="pa-4">
+    <v-card-title class="text-h6 font-weight-bold d-flex align-center text-warning">
+      <v-icon class="me-2" color="warning" size="24">mdi-alert-circle-outline</v-icon>
+      Предупредување
+    </v-card-title>
+    <v-card-text class="text-white text-body-1 mt-2">
+      Забележавме 5 неуспешни обиди за најава.
+      Дали сакате да ја ресетирате вашата лозинка за полесен пристап?
+    </v-card-text>
+    <v-card-actions class="d-flex justify-end">
+      <v-btn variant="text" color="grey-lighten-1" @click="showResetDialog = false">Подоцна</v-btn>
+      <v-btn color="warning" variant="elevated" @click="redirectToForgot">Ресетирај</v-btn>
+    </v-card-actions>
+  </v-card>
+</v-dialog>
+
+<!-- Dialog after 7 failed attempts -->
+<v-dialog v-model="showBlockedDialog" max-width="420" persistent transition="dialog-bottom-transition">
+  <v-card class="pa-4">
+    <v-card-title class="text-h6 font-weight-bold d-flex align-center text-error">
+      <v-icon class="me-2" color="error" size="24">mdi-lock-alert</v-icon>
+      Најавата е блокирана
+    </v-card-title>
+    <v-card-text class="text-white text-body-1 mt-2">
+      Го надмина лимитот на обиди за најава.<br />
+      За да продолжиш, мора да ја ресетираш лозинката.
+    </v-card-text>
+    <v-card-actions class="d-flex justify-end mt-2">
+      <v-btn block color="error" variant="elevated" @click="redirectToForgot">
+        Ресетирај лозинка
+      </v-btn>
+    </v-card-actions>
+  </v-card>
+</v-dialog>
+
+
+
+
       </v-container>
     </div>
   </v-app>
@@ -76,28 +110,40 @@
 <script setup>
 import { ref } from 'vue'
 import { useRouter } from 'vue-router'
-import { getAuth, signInWithEmailAndPassword, setPersistence, browserLocalPersistence, browserSessionPersistence } from 'firebase/auth'
+import {
+  getAuth,
+  signInWithEmailAndPassword,
+  setPersistence,
+  browserLocalPersistence,
+  browserSessionPersistence
+} from 'firebase/auth'
 
 const router = useRouter()
 const form = ref({ email: '', password: '' })
 const loading = ref(false)
 const showPassword = ref(false)
 const rememberMe = ref(false)
+const errorMessage = ref('')
 
-const redirectToForgot = () => {
-  router.push('/forgot-password')
-}
+// NEW: login attempt tracking
+const loginAttempts = ref(0)
+const showResetDialog = ref(false)
+const showBlockedDialog = ref(false)
 
-
-const snackbar = ref({
-  show: false,
-  message: '',
-  color: 'success'
-})
+const redirectToForgot = () => router.push('/forgot-password')
+const redirectToRegister = () => router.push('/register')
 
 const handleLogin = async () => {
   const auth = getAuth()
   loading.value = true
+  errorMessage.value = ''
+
+  // BLOCK after 7th attempt
+  if (loginAttempts.value >= 7) {
+    showBlockedDialog.value = true
+    loading.value = false
+    return
+  }
 
   try {
     const persistence = rememberMe.value ? browserLocalPersistence : browserSessionPersistence
@@ -105,27 +151,41 @@ const handleLogin = async () => {
 
     await signInWithEmailAndPassword(auth, form.value.email, form.value.password)
 
-    snackbar.value = {
-      show: true,
-      message: '✅ Успешно се најавивте!',
-      color: 'success'
+    // success: reset attempts
+    loginAttempts.value = 0
+    router.push('/')
+  } catch (err) {
+    loginAttempts.value++
+
+    switch (err.code) {
+      case 'auth/invalid-email':
+        errorMessage.value = 'Внеси валидна емајл адреса.'
+        break
+      case 'auth/user-not-found':
+        errorMessage.value = 'Нема корисник со таа емајл адреса.'
+        break
+      case 'auth/wrong-password':
+        errorMessage.value = 'Погрешна лозинка. Обиди се повторно.'
+        break
+      default:
+        errorMessage.value = 'Погрешен емајл или лозинка. Обиди се повторно.'
+        break
     }
-    setTimeout(() => router.push('/'), 1000)
-  } catch {
-    snackbar.value = {
-      show: true,
-      message: '❌ Грешка при најава',
-      color: 'error'
+
+    if (loginAttempts.value === 5) {
+      showResetDialog.value = true
+    }
+
+    if (loginAttempts.value >= 7) {
+      showBlockedDialog.value = true
     }
   } finally {
     loading.value = false
   }
 }
-
-const redirectToRegister = () => {
-  router.push('/apply')
-}
 </script>
+
+
 
 <style scoped>
 .background {
@@ -187,5 +247,28 @@ const redirectToRegister = () => {
 .remember-forgot .link:hover {
   text-decoration: underline;
 }
+
+.error-text {
+  color: #ff5252;
+  font-size: 0.9rem;
+  font-weight: 500;
+  margin-top: -16px;
+}
+
+.v-dialog .v-card {
+  background-color: #2c2c2c;
+  border-radius: 14px;
+  box-shadow: 0 12px 28px rgba(0, 0, 0, 0.4);
+}
+
+.v-card-title {
+  align-items: center;
+}
+
+.v-card-text {
+  line-height: 1.6;
+}
+
+
 
 </style>

@@ -1,10 +1,10 @@
 <template>
   <v-app>
     <v-container class="edit-profile-wrapper" fluid>
-      <v-row align="center" justify="center">
+      <v-row align="center" justify="center" class="fill-height">
         <v-col cols="12" sm="10" md="8" lg="6">
           <v-card class="edit-profile-card pa-6" elevation="10">
-            <h2 class="text-h5 text-yellow font-weight-bold text-center mb-6">Aжурирај Профил</h2>
+            <h2 class="text-h5 text-yellow font-weight-bold text-center mb-6">Ажурирај Профил</h2>
 
             <div class="text-center mb-6">
               <label for="imageUpload" class="cursor-pointer avatar-upload">
@@ -82,13 +82,15 @@
               </v-row>
 
               <v-btn
-                type="submit"
-                block
-                class="mt-6 gradient-btn text-white font-weight-bold"
-                height="50"
-              >
-                💾 Зачувај Промени
-              </v-btn>
+              type="submit"
+              block
+              :loading="loading"
+              class="mt-6 gradient-btn text-white font-weight-bold"
+              height="50"
+            >
+              Зачувај промени
+            </v-btn>
+
             </v-form>
           </v-card>
         </v-col>
@@ -108,6 +110,8 @@ import {
   getStorage, ref as storageRef, uploadBytes, getDownloadURL
 } from 'firebase/storage'
 import { db } from '@/firebase'
+const loading = ref(false)
+
 
 const router = useRouter()
 const formRef = ref(null)
@@ -170,39 +174,49 @@ const handleImageChange = async (event) => {
 }
 
 const submitChanges = async () => {
-  const auth = getAuth()
-  const user = auth.currentUser
-  try {
-    if (profile.value.email !== user.email) {
-      await updateEmail(user, profile.value.email)
-    }
-    await updateDoc(doc(db, 'users', userDocId.value), {
-      firstName: profile.value.firstName,
-      lastName: profile.value.lastName,
-      phone: profile.value.phone,
-      city: profile.value.city,
-      email: profile.value.email
-    })
+  loading.value = true
 
-    alert('✅ Промените се успешно зачувани!')
-    router.push('/user-profile')
-  } catch (err) {
-    if (err.code === 'auth/requires-recent-login') {
-      alert('⛔ За да ја промените е-поштата, најавете се повторно.')
-    } else {
-      console.error('Error updating profile:', err)
-      alert('❌ Неуспешно ажурирање на профилот.')
+  setTimeout(async () => {
+    const auth = getAuth()
+    const user = auth.currentUser
+    try {
+      if (profile.value.email !== user.email) {
+        await updateEmail(user, profile.value.email)
+      }
+
+      await updateDoc(doc(db, 'users', userDocId.value), {
+        firstName: profile.value.firstName,
+        lastName: profile.value.lastName,
+        phone: profile.value.phone,
+        city: profile.value.city,
+        email: profile.value.email
+      })
+
+      alert('Промените се успешно зачувани!')
+      router.push('/user-profile')
+    } catch (err) {
+      if (err.code === 'auth/requires-recent-login') {
+        alert('За да ја промените е-поштата, најавете се повторно.')
+      } else {
+        console.error('Error updating profile:', err)
+        alert('Неуспешно ажурирање на профилот.')
+      }
+    } finally {
+      loading.value = false
     }
-  }
+  }, 500) // 500ms минимално траење за UX smoothness
 }
+
 </script>
 
 <style scoped>
 .edit-profile-wrapper {
   background: linear-gradient(135deg, #1a1a1a, #0d0d0d);
-  padding-top: 100px;
-  padding-bottom: 80px;
   min-height: 100vh;
+  padding: 80px 20px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
 
 .edit-profile-card {
