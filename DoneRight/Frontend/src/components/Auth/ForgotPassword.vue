@@ -1,75 +1,152 @@
 <template>
-  <v-divider class="my-8" />
+  <v-app>
+    <div class="background">
+      <div class="overlay"></div>
+      <v-container class="form-container" fluid>
+        <v-card class="form-card" elevation="10">
+          <v-card-title class="text-center text-yellow-darken-2 text-h5 font-weight-bold">
+            🔐 Промени лозинка
+          </v-card-title>
 
-<h3 class="text-h6 font-weight-bold text-yellow mb-4">🔐 Промени лозинка</h3>
+          <v-form ref="passwordForm" @submit.prevent="changePassword" class="px-4">
+            <v-text-field
+              v-model="newPassword"
+              :type="showNew ? 'text' : 'password'"
+              label="Нова лозинка"
+              color="warning"
+              variant="outlined"
+              density="comfortable"
+              :append-inner-icon="showNew ? 'mdi-eye-off' : 'mdi-eye'"
+              @click:append-inner="showNew = !showNew"
+              class="mb-4"
+              :rules="[
+                v => !!v || 'Внеси лозинка',
+                v => v.length >= 6 || 'Минимум 6 карактери'
+              ]"
+            />
 
-<v-form ref="passwordForm" @submit.prevent="changePassword">
-  <v-row dense>
-    <v-col cols="12">
-      <v-text-field
-        v-model="newPassword"
-        label="Нова лозинка"
-        type="password"
-        color="warning"
-        variant="outlined"
-        :rules="[v => !!v || 'Внеси лозинка', v => v.length >= 6 || 'Минимум 6 карактери']"
-      />
-    </v-col>
+            <v-text-field
+              v-model="confirmPassword"
+              :type="showConfirm ? 'text' : 'password'"
+              label="Потврди лозинка"
+              color="warning"
+              variant="outlined"
+              density="comfortable"
+              :append-inner-icon="showConfirm ? 'mdi-eye-off' : 'mdi-eye'"
+              @click:append-inner="showConfirm = !showConfirm"
+              :rules="[
+                v => !!v || 'Потврди ја лозинката',
+                v => v === newPassword || 'Лозинките не се совпаѓаат'
+              ]"
+            />
 
-    <v-col cols="12">
-      <v-text-field
-        v-model="confirmPassword"
-        label="Потврди лозинка"
-        type="password"
-        color="warning"
-        variant="outlined"
-        :rules="[v => !!v || 'Потврди ја лозинката', v => v === newPassword || 'Лозинките не се совпаѓаат']"
-      />
-    </v-col>
-  </v-row>
+            <v-btn
+              type="submit"
+              color="warning"
+              block
+              size="large"
+              class="mt-4 font-weight-bold text-black"
+              :loading="loading"
+            >
+              🔄 Ажурирај лозинка
+            </v-btn>
+          </v-form>
+        </v-card>
 
-  <v-btn
-    type="submit"
-    color="warning"
-    class="mt-2 font-weight-bold text-black"
-    block
-  >
-    🔄 Ажурирај лозинка
-  </v-btn>
-</v-form>
-
+        <!-- Snackbar -->
+        <v-snackbar v-model="snackbar.show" :color="snackbar.color" timeout="3000">
+          {{ snackbar.message }}
+        </v-snackbar>
+      </v-container>
+    </div>
+  </v-app>
 </template>
 
 <script setup>
 import { ref } from 'vue'
 import { getAuth, updatePassword } from 'firebase/auth'
 
-
 const newPassword = ref('')
 const confirmPassword = ref('')
+const showNew = ref(false)
+const showConfirm = ref(false)
+const loading = ref(false)
+
+const snackbar = ref({
+  show: false,
+  message: '',
+  color: 'success'
+})
 
 const changePassword = async () => {
   const auth = getAuth()
   const user = auth.currentUser
 
   if (!newPassword.value || newPassword.value !== confirmPassword.value) {
-    alert('Внесените лозинки не се совпаѓаат.')
+    snackbar.value = {
+      show: true,
+      message: '❌ Лозинките не се совпаѓаат.',
+      color: 'error'
+    }
     return
   }
 
   try {
+    loading.value = true
     await updatePassword(user, newPassword.value)
     newPassword.value = ''
     confirmPassword.value = ''
-    alert('Лозинката е успешно променета!')
+    snackbar.value = {
+      show: true,
+      message: '✅ Лозинката е успешно променета!',
+      color: 'success'
+    }
   } catch (error) {
     console.error('Error updating password:', error)
-    if (error.code === 'auth/requires-recent-login') {
-      alert('За да ја смените лозинката, најавете се повторно.')
-    } else {
-      alert('Грешка при промена на лозинката.')
+    snackbar.value = {
+      show: true,
+      message: error.code === 'auth/requires-recent-login'
+        ? 'ℹ️ Најавете се повторно за да смените лозинка.'
+        : '❌ Грешка при промена на лозинката.',
+      color: error.code === 'auth/requires-recent-login' ? 'info' : 'error'
     }
+  } finally {
+    loading.value = false
   }
 }
+</script>
 
-</script> 
+<style scoped>
+.background {
+  position: relative;
+  width: 100%;
+  height: 100vh;
+  background-color: #212529;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  overflow: hidden;
+}
+.overlay {
+  position: absolute;
+  width: 100%;
+  height: 100%;
+  backdrop-filter: blur(10px);
+  background: rgba(0, 0, 0, 0.3);
+  z-index: 0;
+}
+.form-container {
+  z-index: 1;
+  display: flex;
+  justify-content: center;
+}
+.form-card {
+  background-color: rgba(255, 255, 255, 0.05);
+  backdrop-filter: blur(12px);
+  border-radius: 16px;
+  padding: 30px 20px;
+  max-width: 420px;
+  width: 100%;
+  color: white;
+}
+</style>

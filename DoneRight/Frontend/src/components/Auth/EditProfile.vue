@@ -1,16 +1,17 @@
 <template>
   <v-app>
-    <v-container class="edit-profile-wrapper fill-height" fluid>
+    <v-container class="edit-profile-wrapper" fluid>
       <v-row align="center" justify="center">
         <v-col cols="12" sm="10" md="8" lg="6">
-          <v-card class="edit-profile-card pa-6" elevation="12">
-            <h2 class="text-h5 text-yellow font-weight-bold text-center mb-6">✨ Aжурирај Профил</h2>
+          <v-card class="edit-profile-card pa-6" elevation="10">
+            <h2 class="text-h5 text-yellow font-weight-bold text-center mb-6">Aжурирај Профил</h2>
 
-            <div class="text-center mb-5">
-              <label for="imageUpload" class="cursor-pointer">
-                <v-avatar size="100">
+            <div class="text-center mb-6">
+              <label for="imageUpload" class="cursor-pointer avatar-upload">
+                <v-avatar size="110" class="mx-auto avatar-glow">
                   <v-img :src="profile.profilePicture || defaultImage" cover />
                 </v-avatar>
+                <p class="upload-hint">Смени слика</p>
               </label>
               <input
                 id="imageUpload"
@@ -99,25 +100,12 @@
 <script setup>
 import { ref, onMounted } from 'vue'
 import { useRouter } from 'vue-router'
+import { getAuth, onAuthStateChanged, updateEmail } from 'firebase/auth'
 import {
-  getAuth,
-  onAuthStateChanged,
-  updateEmail
-} from 'firebase/auth'
-import {
-  collection,
-  getDocs,
-  query,
-  where,
-  doc,
-  updateDoc,
-  getDoc
+  collection, getDocs, query, where, doc, updateDoc, getDoc
 } from 'firebase/firestore'
 import {
-  getStorage,
-  ref as storageRef,
-  uploadBytes,
-  getDownloadURL
+  getStorage, ref as storageRef, uploadBytes, getDownloadURL
 } from 'firebase/storage'
 import { db } from '@/firebase'
 
@@ -141,18 +129,12 @@ onMounted(() => {
   onAuthStateChanged(auth, async (user) => {
     if (user) {
       profile.value.email = user.email
-
       const q = query(collection(db, 'users'), where('uid', '==', user.uid))
       const snapshot = await getDocs(q)
-
       if (!snapshot.empty) {
         const userData = snapshot.docs[0].data()
         userDocId.value = snapshot.docs[0].id
-
-        Object.assign(profile.value, {
-          ...userData,
-          email: user.email
-        })
+        Object.assign(profile.value, { ...userData, email: user.email })
 
         const picRef = doc(db, 'userProfilePictures', user.uid)
         const picSnap = await getDoc(picRef)
@@ -190,12 +172,10 @@ const handleImageChange = async (event) => {
 const submitChanges = async () => {
   const auth = getAuth()
   const user = auth.currentUser
-
   try {
     if (profile.value.email !== user.email) {
       await updateEmail(user, profile.value.email)
     }
-
     await updateDoc(doc(db, 'users', userDocId.value), {
       firstName: profile.value.firstName,
       lastName: profile.value.lastName,
@@ -204,14 +184,14 @@ const submitChanges = async () => {
       email: profile.value.email
     })
 
-    alert('Промените се успешно зачувани!')
+    alert('✅ Промените се успешно зачувани!')
     router.push('/user-profile')
   } catch (err) {
     if (err.code === 'auth/requires-recent-login') {
-      alert('За да ја промените е-поштата, најавете се повторно.')
+      alert('⛔ За да ја промените е-поштата, најавете се повторно.')
     } else {
       console.error('Error updating profile:', err)
-      alert('Неуспешно ажурирање на профилот.')
+      alert('❌ Неуспешно ажурирање на профилот.')
     }
   }
 }
@@ -226,22 +206,32 @@ const submitChanges = async () => {
 }
 
 .edit-profile-card {
-  background: rgba(255, 255, 255, 0.03);
+  background: rgba(255, 255, 255, 0.04);
   border-radius: 20px;
   border: 1px solid rgba(255, 255, 255, 0.08);
-  backdrop-filter: blur(16px);
+  backdrop-filter: blur(12px);
   box-shadow: 0 12px 32px rgba(0, 0, 0, 0.4);
   color: white;
 }
 
 .gradient-btn {
   background: linear-gradient(90deg, #ffc107, #ff9800);
-  box-shadow: 0 4px 14px rgba(255, 193, 7, 0.4);
-  transition: all 0.3s ease;
+  box-shadow: 0 4px 14px rgba(255, 193, 7, 0.3);
+  transition: 0.3s ease;
 }
-
 .gradient-btn:hover {
   background: linear-gradient(90deg, #ffdd57, #ffab40);
   transform: scale(1.02);
+}
+
+.avatar-glow {
+  border: 3px solid #ffc107;
+  box-shadow: 0 0 12px rgba(255, 193, 7, 0.4);
+}
+
+.upload-hint {
+  font-size: 0.9rem;
+  color: #aaa;
+  margin-top: 6px;
 }
 </style>

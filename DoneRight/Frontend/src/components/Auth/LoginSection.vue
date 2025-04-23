@@ -9,6 +9,7 @@
           </v-card-title>
 
           <v-form @submit.prevent="handleLogin" class="px-4">
+            <!-- Email -->
             <v-text-field
               v-model="form.email"
               label="Емајл адреса"
@@ -21,34 +22,52 @@
               required
             />
 
+            <!-- Password -->
             <v-text-field
               v-model="form.password"
+              :type="showPassword ? 'text' : 'password'"
               label="Лозинка"
-              type="password"
               variant="outlined"
               density="comfortable"
               color="warning"
+              :append-inner-icon="showPassword ? 'mdi-eye-off' : 'mdi-eye'"
+              @click:append-inner="showPassword = !showPassword"
               hide-details
-              class="mb-4"
               required
             />
+
+            <!-- Remember + Forgot in one row -->
+            <div class="remember-forgot d-flex justify-space-between align-center mt-2 mb-5">
+              <span class="link text-caption" @click="redirectToForgot">Заборавена лозинка?</span>
+            </div>
+
+
+
+
 
             <div class="account-link text-white text-caption mb-5">
               Немате профил?
               <span class="link" @click="redirectToRegister">Регистрирај се</span>
             </div>
 
+            <!-- Submit Button -->
             <v-btn
               type="submit"
               color="warning"
               block
               size="large"
               class="text-white font-weight-bold"
+              :loading="loading"
             >
               Најави се
             </v-btn>
           </v-form>
         </v-card>
+
+        <!-- Snackbar -->
+        <v-snackbar v-model="snackbar.show" :color="snackbar.color" timeout="3000">
+          {{ snackbar.message }}
+        </v-snackbar>
       </v-container>
     </div>
   </v-app>
@@ -57,27 +76,49 @@
 <script setup>
 import { ref } from 'vue'
 import { useRouter } from 'vue-router'
-import { getAuth, signInWithEmailAndPassword } from 'firebase/auth'
+import { getAuth, signInWithEmailAndPassword, setPersistence, browserLocalPersistence, browserSessionPersistence } from 'firebase/auth'
 
 const router = useRouter()
-const form = ref({
-  email: '',
-  password: ''
+const form = ref({ email: '', password: '' })
+const loading = ref(false)
+const showPassword = ref(false)
+const rememberMe = ref(false)
+
+const redirectToForgot = () => {
+  router.push('/forgot-password')
+}
+
+
+const snackbar = ref({
+  show: false,
+  message: '',
+  color: 'success'
 })
 
 const handleLogin = async () => {
   const auth = getAuth()
+  loading.value = true
+
   try {
-    const userCredential = await signInWithEmailAndPassword(
-      auth,
-      form.value.email,
-      form.value.password
-    )
-    alert('Најавата беше успешна!')
-    router.push('/')
-  } catch (error) {
-    console.error('Login error:', error)
-    alert('Грешка при најава: ' + error.message)
+    const persistence = rememberMe.value ? browserLocalPersistence : browserSessionPersistence
+    await setPersistence(auth, persistence)
+
+    await signInWithEmailAndPassword(auth, form.value.email, form.value.password)
+
+    snackbar.value = {
+      show: true,
+      message: '✅ Успешно се најавивте!',
+      color: 'success'
+    }
+    setTimeout(() => router.push('/'), 1000)
+  } catch {
+    snackbar.value = {
+      show: true,
+      message: '❌ Грешка при најава',
+      color: 'error'
+    }
+  } finally {
+    loading.value = false
   }
 }
 
@@ -119,13 +160,10 @@ const redirectToRegister = () => {
   width: 100%;
   color: white;
 }
-
-/* Link styling */
 .account-link {
   text-align: center;
   color: #ddd;
 }
-
 .account-link .link {
   color: #ffc107;
   cursor: pointer;
@@ -134,4 +172,20 @@ const redirectToRegister = () => {
 .account-link .link:hover {
   text-decoration: underline;
 }
+
+.remember-forgot {
+  padding-inline: 4px;
+}
+
+.remember-forgot .link {
+  color: #ffc107;
+  cursor: pointer;
+  font-weight: 600;
+  white-space: nowrap;
+}
+
+.remember-forgot .link:hover {
+  text-decoration: underline;
+}
+
 </style>
