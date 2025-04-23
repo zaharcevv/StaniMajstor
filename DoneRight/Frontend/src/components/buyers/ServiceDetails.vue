@@ -1,7 +1,8 @@
 <script setup>
-import { ref, computed, onMounted } from "vue"
+import { ref, onMounted, computed } from "vue"
 import { useRoute, useRouter } from "vue-router"
-import { getDoc, doc, getDocs, query, collection, where } from "firebase/firestore"
+import { getDoc, doc, getDocs, query, collection, where, updateDoc, arrayUnion } from "firebase/firestore"
+import { getAuth, onAuthStateChanged } from "firebase/auth"
 import { db } from "@/firebase"
 import DefaultLayout from "@/layouts/DefaultLayout.vue"
 
@@ -11,49 +12,51 @@ const router = useRouter()
 const service = ref(null)
 const userInfo = ref(null)
 const loading = ref(true)
+const currentUser = ref(null)
+
+const newReviewText = ref("")
+const newRating = ref(5)
+const showReviewForm = ref(false)
+const reviews = ref([])
 
 const portfolioImages = [
   new URL('@/assets/workers.png', import.meta.url).href,
   new URL('@/assets/workers.png', import.meta.url).href
 ]
 
-const reviews = [
-  { name: "Ана", rating: 5, comment: "Одличен мајстор, многу професионален!" },
-  { name: "Игор", rating: 4, comment: "Задоволен сум од услугата. Препорачувам!" }
-]
+const averageRating = computed(() => {
+  if (reviews.value.length === 0) return 0
+  return reviews.value.reduce((sum, r) => sum + (r.rating || 0), 0) / reviews.value.length
+})
 
-const averageRating = reviews.reduce((a, b) => a + b.rating, 0) / reviews.length
 const availability = "Онлајн"
-
-const goBack = () => {
-  router.push("/services")
-}
-
 const fallbackImage = new URL('@/assets/lok.png', import.meta.url).href
 
 const profileImage = computed(() => {
   return userInfo.value?.image || fallbackImage
 })
 
-onMounted(async () => {
+const goBack = () => {
+  router.push("/services")
+}
+
+const fetchServiceDetails = async () => {
   const serviceId = route.params.id
   if (!serviceId) return
 
   try {
-    // Get the service
     const serviceDoc = await getDoc(doc(db, "services", serviceId))
     if (!serviceDoc.exists()) return
 
     service.value = { id: serviceDoc.id, ...serviceDoc.data() }
+    reviews.value = service.value.comments || []
 
-    // Get the user info
     const userQuery = query(collection(db, "users"), where("uid", "==", service.value.userId))
     const userSnap = await getDocs(userQuery)
 
     if (!userSnap.empty) {
       userInfo.value = userSnap.docs[0].data()
 
-      // Try to load profile picture
       const profilePicDoc = await getDoc(doc(db, "userProfilePictures", service.value.userId))
       if (profilePicDoc.exists()) {
         const profileData = profilePicDoc.data()
@@ -67,8 +70,39 @@ onMounted(async () => {
   } finally {
     loading.value = false
   }
-})
+}
 
+const submitReview = async () => {
+  if (!service.value || !service.value.id || !newReviewText.value.trim()) return
+
+  const name = currentUser.value?.displayName || "Анонимен"
+  const review = {
+    name,
+    rating: newRating.value,
+    comment: newReviewText.value.trim()
+  }
+
+  try {
+    const serviceRef = doc(db, "services", service.value.id)
+    await updateDoc(serviceRef, {
+      comments: arrayUnion(review)
+    })
+    reviews.value.push(review)
+    newReviewText.value = ""
+    newRating.value = 5
+    showReviewForm.value = false
+  } catch (err) {
+    console.error("Failed to submit review:", err)
+  }
+}
+
+onMounted(async () => {
+  const auth = getAuth()
+  onAuthStateChanged(auth, async (user) => {
+    currentUser.value = user
+  })
+  await fetchServiceDetails()
+})
 </script>
 
 <template>
@@ -132,17 +166,27 @@ onMounted(async () => {
                 <p>{{ r.comment }}</p>
               </div>
 
-              <v-btn class="write-review mt-3" color="warning" variant="flat">
+              <v-btn class="write-review mt-3" color="warning" variant="flat" @click="showReviewForm = true">
                 Напиши рецензија
               </v-btn>
+
+              <div v-if="showReviewForm" class="mt-4">
+                <v-rating v-model="newRating" color="yellow-darken-2" background-color="grey" hover size="28" />
+                <v-textarea
+                  v-model="newReviewText"
+                  label="Вашата рецензија"
+                  auto-grow
+                  rows="3"
+                  color="warning"
+                  class="mt-2"
+                />
+                <v-btn color="yellow-darken-2" class="mt-2 text-black font-weight-bold" @click="submitReview">
+                  Објави рецензија
+                </v-btn>
+              </div>
             </div>
 
-            <v-btn
-              class="back-btn mt-6"
-              size="large"
-              rounded
-              @click="goBack"
-            >
+            <v-btn class="back-btn mt-6" size="large" rounded @click="goBack">
               <v-icon start>mdi-arrow-left</v-icon>
               Назад кон мајсторите
             </v-btn>
@@ -152,6 +196,7 @@ onMounted(async () => {
     </section>
   </DefaultLayout>
 </template>
+
 
 <style scoped>
 .details-wrapper {
