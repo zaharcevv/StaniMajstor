@@ -28,6 +28,49 @@
             </v-col>
           </v-row>
 
+          <section class="my-services mt-10">
+          <div class="d-flex justify-space-between align-center mb-4">
+            <h2 class="section-title">Мои објавени услуги</h2>
+            <v-btn color="warning" @click="router.push('/next-form')">
+              ➕ Објави нова услуга
+            </v-btn>
+          </div>
+
+          <v-row v-if="userServices.length" dense>
+            <v-col
+              v-for="service in userServices"
+              :key="service.id"
+              cols="12"
+              sm="6"
+              md="4"
+            >
+              <v-card class="my-service-card" elevation="6">
+                <v-card-title class="text-yellow font-weight-bold">
+                  {{ service.service || 'Без име' }}
+                </v-card-title>
+                <v-card-text>
+                  <div><strong>Опис:</strong> {{ service.description || 'Немате внесено опис' }}</div>
+                  <div><strong>Град:</strong> {{ service.location || 'Непознато' }}</div>
+                  <div><strong>Цена:</strong> {{ service.price || 'Н/П' }}</div>
+                </v-card-text>
+                <v-card-actions>
+                  <v-btn color="error" variant="tonal" @click="deleteService(service.id)">
+                    Избриши
+                  </v-btn>
+                </v-card-actions>
+              </v-card>
+            </v-col>
+          </v-row>
+
+          <v-row v-else justify="center" class="mt-6">
+            <v-col cols="12" class="text-center text-grey">
+              <v-icon size="48" class="mb-2">mdi-wrench</v-icon>
+              <p>Сѐ уште немате објавено ниедна услуга.</p>
+            </v-col>
+          </v-row>
+        </section>
+
+
           <!-- Upcoming Jobs -->
           <div class="section">
             <h2 class="section-title">Закажани работи</h2>
@@ -83,6 +126,14 @@
 </template>
 
 <script setup>
+import { useRouter } from 'vue-router'
+import { ref, onMounted } from 'vue'
+import { getAuth, onAuthStateChanged } from 'firebase/auth'
+import { collection, query, where, getDocs, deleteDoc, doc } from 'firebase/firestore'
+import { db } from '@/firebase'
+
+
+const router = useRouter()
 
 const username = 'Мајсторе'
 
@@ -101,7 +152,61 @@ const latestReviews = [
   { name: 'Стефан', rating: 5, comment: 'Супер работа, професионално и брзо!' },
   { name: 'Марија', rating: 4, comment: 'Малку доцнеше, но добра изведба.' }
 ]
+
+const userServices = ref([])
+
+const fetchUserServices = async (uid) => {
+  const q = query(collection(db, 'services'), where('userId', '==', uid))
+  const snapshot = await getDocs(q)
+
+  const enriched = await Promise.all(snapshot.docs.map(async (docSnap) => {
+    const serviceData = docSnap.data()
+    let city = 'Непознато'
+
+    // Fetch city from users collection
+    try {
+      const userQuery = query(collection(db, 'users'), where('uid', '==', uid))
+      const userSnap = await getDocs(userQuery)
+
+      if (!userSnap.empty) {
+        city = userSnap.docs[0].data().city || city
+      }
+    } catch (error) {
+      console.error('Error fetching city:', error)
+    }
+
+    return {
+      id: docSnap.id,
+      ...serviceData,
+      location: city
+    }
+  }))
+
+  userServices.value = enriched
+}
+
+const deleteService = async (id) => {
+  await deleteDoc(doc(db, 'services', id))
+  userServices.value = userServices.value.filter(s => s.id !== id)
+}
+
+// ✅ Fetch user services on mount if logged in
+onMounted(() => {
+  const auth = getAuth()
+  const user = auth.currentUser
+
+  if (user) {
+    fetchUserServices(user.uid)
+  } else {
+    onAuthStateChanged(auth, (user) => {
+      if (user) {
+        fetchUserServices(user.uid)
+      }
+    })
+  }
+})
 </script>
+
 
 <style scoped>
 .layout-wrapper {
@@ -181,4 +286,17 @@ const latestReviews = [
   background: #1c1c1c;
   border-radius: 12px;
 }
+
+.my-service-card {
+  background: rgba(255, 255, 255, 0.04);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  backdrop-filter: blur(10px);
+  color: white;
+  transition: transform 0.3s ease;
+}
+.my-service-card:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 8px 24px rgba(255, 193, 7, 0.15);
+}
+
 </style>
