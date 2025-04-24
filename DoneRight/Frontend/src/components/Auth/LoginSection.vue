@@ -74,7 +74,7 @@
       Дали сакате да ја ресетирате вашата лозинка за полесен пристап?
     </v-card-text>
     <v-card-actions class="d-flex justify-end">
-      <v-btn variant="text" color="grey-lighten-1" @click="showResetDialog = false">Подоцна</v-btn>
+      <v-btn variant="text" color="white" @click="showResetDialog = false">Подоцна</v-btn>
       <v-btn color="warning" variant="elevated" @click="redirectToForgot">Ресетирај</v-btn>
     </v-card-actions>
   </v-card>
@@ -252,7 +252,7 @@ const handleLogin = async () => {
   color: #ff5252;
   font-size: 0.9rem;
   font-weight: 500;
-  margin-top: -16px;
+  margin-top: -10px;
 }
 
 .v-dialog .v-card {

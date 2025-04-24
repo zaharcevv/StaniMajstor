@@ -1,7 +1,9 @@
 <script setup>
 import { ref, onMounted, computed } from "vue"
 import { useRoute, useRouter } from "vue-router"
-import { getDoc, doc, getDocs, query, collection, where, updateDoc, arrayUnion } from "firebase/firestore"
+import {
+  getDoc, doc, getDocs, query, collection, where, updateDoc, arrayUnion, arrayRemove
+} from "firebase/firestore"
 import { getAuth, onAuthStateChanged } from "firebase/auth"
 import { db } from "@/firebase"
 import DefaultLayout from "@/layouts/DefaultLayout.vue"
@@ -11,13 +13,17 @@ const router = useRouter()
 
 const service = ref(null)
 const userInfo = ref(null)
-const loading = ref(true)
 const currentUser = ref(null)
+const reviews = ref([])
 
 const newReviewText = ref("")
 const newRating = ref(5)
 const showReviewForm = ref(false)
-const reviews = ref([])
+const isEditing = ref(false)
+const loginDialog = ref(false)
+
+const currentPage = ref(1)
+const reviewsPerPage = 5
 
 const portfolioImages = [
   new URL('@/assets/workers.png', import.meta.url).href,
@@ -32,85 +38,140 @@ const averageRating = computed(() => {
 const availability = "Онлајн"
 const fallbackImage = new URL('@/assets/lok.png', import.meta.url).href
 
-const profileImage = computed(() => {
-  return userInfo.value?.image || fallbackImage
+const profileImage = computed(() => userInfo.value?.image || fallbackImage)
+
+const userReview = computed(() =>
+  reviews.value.find(r => r.uid === currentUser.value?.uid)
+)
+
+const paginatedReviews = computed(() => {
+  const start = (currentPage.value - 1) * reviewsPerPage
+  return reviews.value.slice(start, start + reviewsPerPage)
+})
+
+const totalPages = computed(() => {
+  return Math.ceil(reviews.value.length / reviewsPerPage)
+})
+
+const fetchServiceDetails = async () => {
+  const serviceId = route.params.id
+  if (!serviceId) return
+
+  const serviceDoc = await getDoc(doc(db, "services", serviceId))
+  if (!serviceDoc.exists()) return
+
+  service.value = { id: serviceDoc.id, ...serviceDoc.data() }
+  reviews.value = service.value.comments || []
+
+  const userQuery = query(collection(db, "users"), where("uid", "==", service.value.userId))
+  const userSnap = await getDocs(userQuery)
+  if (!userSnap.empty) {
+    userInfo.value = userSnap.docs[0].data()
+
+    const profilePicDoc = await getDoc(doc(db, "userProfilePictures", service.value.userId))
+    if (profilePicDoc.exists()) {
+      const profileData = profilePicDoc.data()
+      if (profileData.profilePicture) {
+        userInfo.value.image = profileData.profilePicture
+      }
+    }
+  }
+}
+
+const submitReview = async () => {
+  if (!currentUser.value || userReview.value) return
+
+  if (newReviewText.value.trim().length < 10) {
+    alert("Рецензијата мора да содржи најмалку 10 карактери.")
+    return
+  }
+
+  const review = {
+    uid: currentUser.value.uid,
+    name: currentUser.value.displayName || "Анонимен",
+    rating: newRating.value,
+    comment: newReviewText.value.trim()
+  }
+
+  try {
+    const ref = doc(db, "services", service.value.id)
+    await updateDoc(ref, { comments: arrayUnion(review) })
+    reviews.value.push(review)
+    resetForm()
+  } catch (e) {
+    console.error(e)
+  }
+}
+
+const updateReview = async () => {
+  if (!userReview.value) return
+
+  const updated = {
+    ...userReview.value,
+    rating: newRating.value,
+    comment: newReviewText.value.trim()
+  }
+
+  try {
+    const ref = doc(db, "services", service.value.id)
+    await updateDoc(ref, {
+      comments: arrayRemove(userReview.value)
+    })
+    await updateDoc(ref, {
+      comments: arrayUnion(updated)
+    })
+
+    const idx = reviews.value.findIndex(r => r.uid === currentUser.value.uid)
+    reviews.value[idx] = updated
+    resetForm()
+  } catch (e) {
+    console.error(e)
+  }
+}
+
+const resetForm = () => {
+  newReviewText.value = ""
+  newRating.value = 5
+  showReviewForm.value = false
+  isEditing.value = false
+}
+
+const editReview = () => {
+  newReviewText.value = userReview.value.comment
+  newRating.value = userReview.value.rating
+  showReviewForm.value = true
+  isEditing.value = true
+}
+
+const handleWriteReviewClick = () => {
+  if (!currentUser.value) {
+    loginDialog.value = true
+  } else {
+    showReviewForm.value = true
+  }
+}
+
+onMounted(async () => {
+  const auth = getAuth()
+  onAuthStateChanged(auth, async user => {
+    currentUser.value = user
+    await fetchServiceDetails()
+  })
 })
 
 const goBack = () => {
   router.push("/services")
 }
 
-const fetchServiceDetails = async () => {
-  const serviceId = route.params.id
-  if (!serviceId) return
 
-  try {
-    const serviceDoc = await getDoc(doc(db, "services", serviceId))
-    if (!serviceDoc.exists()) return
-
-    service.value = { id: serviceDoc.id, ...serviceDoc.data() }
-    reviews.value = service.value.comments || []
-
-    const userQuery = query(collection(db, "users"), where("uid", "==", service.value.userId))
-    const userSnap = await getDocs(userQuery)
-
-    if (!userSnap.empty) {
-      userInfo.value = userSnap.docs[0].data()
-
-      const profilePicDoc = await getDoc(doc(db, "userProfilePictures", service.value.userId))
-      if (profilePicDoc.exists()) {
-        const profileData = profilePicDoc.data()
-        if (profileData.profilePicture) {
-          userInfo.value.image = profileData.profilePicture
-        }
-      }
-    }
-  } catch (err) {
-    console.error("Failed to load service:", err)
-  } finally {
-    loading.value = false
-  }
-}
-
-const submitReview = async () => {
-  if (!service.value || !service.value.id || !newReviewText.value.trim()) return
-
-  const name = currentUser.value?.displayName || "Анонимен"
-  const review = {
-    name,
-    rating: newRating.value,
-    comment: newReviewText.value.trim()
-  }
-
-  try {
-    const serviceRef = doc(db, "services", service.value.id)
-    await updateDoc(serviceRef, {
-      comments: arrayUnion(review)
-    })
-    reviews.value.push(review)
-    newReviewText.value = ""
-    newRating.value = 5
-    showReviewForm.value = false
-  } catch (err) {
-    console.error("Failed to submit review:", err)
-  }
-}
-
-onMounted(async () => {
-  const auth = getAuth()
-  onAuthStateChanged(auth, async (user) => {
-    currentUser.value = user
-  })
-  await fetchServiceDetails()
-})
 </script>
-
 <template>
   <DefaultLayout>
     <section class="details-wrapper">
       <v-container>
         <v-row justify="center">
           <v-col cols="12" md="8" lg="6">
+            <!-- Профил секција -->
             <div class="profile-box">
               <v-avatar size="130" class="avatar-img">
                 <v-img :src="profileImage" />
@@ -121,11 +182,13 @@ onMounted(async () => {
               <span class="badge" :class="availability.toLowerCase()">{{ availability }}</span>
             </div>
 
+            <!-- Резиме на оценки -->
             <div class="rating-summary mb-6">
               <h3 class="rating-number">⭐ {{ averageRating.toFixed(1) }}/5</h3>
               <p class="text-muted">{{ reviews.length }} корисници го оценија овој мајстор</p>
             </div>
 
+            <!-- Информации -->
             <div class="section">
               <h3>Oпис на услугата</h3>
               <p>{{ service?.description || "Описот не е достапен." }}</p>
@@ -156,22 +219,54 @@ onMounted(async () => {
               <h3>Контакт информации</h3>
               <p>📞 {{ userInfo?.phone || 'Нема информација' }} </p>
               <p>✉️ {{ userInfo?.email || 'Нема информација' }} </p>
-              <p>🌐 Профил: <a :href="route.query.website || '#'" target="_blank" class="text-link">Веб страна</a></p>
+              <p>🌐 Профил: 
+                <a :href="route.query.website || '#'" target="_blank" class="text-link">Веб страна</a>
+              </p>
             </div>
 
+            <!-- Рецензии -->
             <div class="section">
               <h3>Рецензии</h3>
-              <div class="review" v-for="(r, i) in reviews" :key="i">
+
+              <div class="review" v-for="(r, i) in paginatedReviews" :key="i">
                 <strong>{{ r.name }}</strong> - ⭐ {{ r.rating }}/5
                 <p>{{ r.comment }}</p>
+                <v-icon
+  v-if="currentUser && r.uid === currentUser.uid"
+  class="mt-1"
+  @click="editReview"
+>
+  mdi-pencil
+</v-icon>
               </div>
 
-              <v-btn class="write-review mt-3" color="warning" variant="flat" @click="showReviewForm = true">
+              <v-pagination
+                v-if="totalPages > 1"
+                v-model="currentPage"
+                :length="totalPages"
+                total-visible="5"
+                color="yellow-darken-2"
+                class="mt-4"
+              />
+
+              <v-btn
+                v-if="!userReview && !showReviewForm"
+                class="write-review mt-3"
+                color="warning"
+                variant="flat"
+                @click="handleWriteReviewClick"
+              >
                 Напиши рецензија
               </v-btn>
 
               <div v-if="showReviewForm" class="mt-4">
-                <v-rating v-model="newRating" color="yellow-darken-2" background-color="grey" hover size="28" />
+                <v-rating
+                  v-model="newRating"
+                  color="yellow-darken-2"
+                  background-color="grey"
+                  hover
+                  size="28"
+                />
                 <v-textarea
                   v-model="newReviewText"
                   label="Вашата рецензија"
@@ -180,7 +275,20 @@ onMounted(async () => {
                   color="warning"
                   class="mt-2"
                 />
-                <v-btn color="yellow-darken-2" class="mt-2 text-black font-weight-bold" @click="submitReview">
+                <v-btn
+                  v-if="isEditing"
+                  color="yellow-darken-2"
+                  class="mt-2 text-black font-weight-bold"
+                  @click="updateReview"
+                >
+                  Ажурирај рецензија
+                </v-btn>
+                <v-btn
+                  v-else
+                  color="yellow-darken-2"
+                  class="mt-2 text-black font-weight-bold"
+                  @click="submitReview"
+                >
                   Објави рецензија
                 </v-btn>
               </div>
@@ -193,9 +301,27 @@ onMounted(async () => {
           </v-col>
         </v-row>
       </v-container>
+
+      <!-- Дијалог ако не е најавен -->
+      <v-dialog v-model="loginDialog" max-width="420" transition="dialog-bottom-transition">
+        <v-card class="pa-4">
+          <v-card-title class="text-h6 font-weight-bold d-flex align-center text-warning">
+            <v-icon class="me-2" color="warning" size="24">mdi-alert-circle-outline</v-icon>
+            Најава потребна
+          </v-card-title>
+          <v-card-text class="text-white text-body-1 mt-2">
+            За да напишете рецензија, мора да сте најавени на вашиот профил.
+          </v-card-text>
+          <v-card-actions class="d-flex justify-end">
+            <v-btn variant="text" color="white" @click="loginDialog = false">Подоцна</v-btn>
+            <v-btn color="warning" variant="elevated" @click="router.push('/login')">Најави се</v-btn>
+          </v-card-actions>
+        </v-card>
+      </v-dialog>
     </section>
   </DefaultLayout>
 </template>
+
 
 
 <style scoped>
@@ -317,5 +443,11 @@ onMounted(async () => {
 .text-link {
   color: #ffc107;
   text-decoration: underline;
+}
+
+.v-dialog .v-card {
+  background-color: #2c2c2c;
+  border-radius: 14px;
+  box-shadow: 0 12px 28px rgba(0, 0, 0, 0.4);
 }
 </style>

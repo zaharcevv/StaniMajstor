@@ -1,10 +1,29 @@
 <template>
   <v-app>
-    <div class="layout-wrapper">
-      <!-- Sidebar, AppBar ... како што веќе имаш -->
+    <div class="layout-wrapper d-flex">
+      <!-- Sidebar -->
+      <v-navigation-drawer app v-model="drawer" class="sidebar" color="#1e1e1e" width="240">
+        <v-list dense>
+          <v-list-item @click="router.push('/')">
+            <v-list-item-icon><v-icon color="yellow">mdi-view-dashboard</v-icon></v-list-item-icon>
+            <v-list-item-title class="text-white">Дашборд</v-list-item-title>
+          </v-list-item>
+          <v-list-item @click="router.push('/profile')">
+            <v-list-item-icon><v-icon color="yellow">mdi-account</v-icon></v-list-item-icon>
+            <v-list-item-title class="text-white">Профил</v-list-item-title>
+          </v-list-item>
+          <v-list-item @click="router.push('/logout')">
+            <v-list-item-icon><v-icon color="red">mdi-logout</v-icon></v-list-item-icon>
+            <v-list-item-title class="text-white">Одјави се</v-list-item-title>
+          </v-list-item>
+        </v-list>
+      </v-navigation-drawer>
 
       <v-main class="main-area">
         <v-container fluid>
+          <v-btn icon @click="drawer = !drawer" class="mb-4">
+            <v-icon color="white">mdi-menu</v-icon>
+          </v-btn>
           <h1 class="dashboard-title">Добредојде назад, {{ username }} 👋</h1>
 
           <!-- Status & Quick Info -->
@@ -28,48 +47,51 @@
             </v-col>
           </v-row>
 
+          <!-- My Services -->
           <section class="my-services mt-10">
-          <div class="d-flex justify-space-between align-center mb-4">
-            <h2 class="section-title">Мои објавени услуги</h2>
-            <v-btn color="warning" @click="router.push('/next-form')">
-              ➕ Објави нова услуга
-            </v-btn>
-          </div>
+            <div class="d-flex justify-space-between align-center mb-4">
+              <h2 class="section-title">Мои објавени услуги</h2>
+              <v-btn color="warning" @click="router.push('/next-form')">
+                ➕ Објави нова услуга
+              </v-btn>
+            </div>
 
-          <v-row v-if="userServices.length" dense>
-            <v-col
-              v-for="service in userServices"
-              :key="service.id"
-              cols="12"
-              sm="6"
-              md="4"
-            >
-              <v-card class="my-service-card" elevation="6">
-                <v-card-title class="text-yellow font-weight-bold">
-                  {{ service.service || 'Без име' }}
-                </v-card-title>
-                <v-card-text>
-                  <div><strong>Опис:</strong> {{ service.description || 'Немате внесено опис' }}</div>
-                  <div><strong>Град:</strong> {{ service.location || 'Непознато' }}</div>
-                  <div><strong>Цена:</strong> {{ service.price || 'Н/П' }}</div>
-                </v-card-text>
-                <v-card-actions>
-                  <v-btn color="error" variant="tonal" @click="deleteService(service.id)">
-                    Избриши
-                  </v-btn>
-                </v-card-actions>
-              </v-card>
-            </v-col>
-          </v-row>
+            <v-row v-if="userServices.length" dense>
+              <v-col
+                v-for="service in userServices"
+                :key="service.id"
+                cols="12"
+                sm="6"
+                md="4"
+              >
+                <v-card class="my-service-card" elevation="6">
+                  <v-card-title class="text-yellow font-weight-bold">
+                    {{ service.service || 'Без име' }}
+                  </v-card-title>
+                  <v-card-text>
+                    <div><strong>Опис:</strong> {{ service.description || 'Немате внесено опис' }}</div>
+                    <div><strong>Град:</strong> {{ service.location || 'Непознато' }}</div>
+                    <div><strong>Цена:</strong> {{ service.price || 'Н/П' }}</div>
+                    <v-btn class="mt-3" variant="text" color="warning" @click="router.push(`/edit-service/${service.id}`)">
+                      Уреди услуга / Слики
+                    </v-btn>
+                  </v-card-text>
+                  <v-card-actions>
+                    <v-btn color="error" variant="tonal" @click="deleteService(service.id)">
+                      Избриши
+                    </v-btn>
+                  </v-card-actions>
+                </v-card>
+              </v-col>
+            </v-row>
 
-          <v-row v-else justify="center" class="mt-6">
-            <v-col cols="12" class="text-center text-grey">
-              <v-icon size="48" class="mb-2">mdi-wrench</v-icon>
-              <p>Сѐ уште немате објавено ниедна услуга.</p>
-            </v-col>
-          </v-row>
-        </section>
-
+            <v-row v-else justify="center" class="mt-6">
+              <v-col cols="12" class="text-center text-grey">
+                <v-icon size="48" class="mb-2">mdi-wrench</v-icon>
+                <p>Сё уште немате објавено ниедна услуга.</p>
+              </v-col>
+            </v-row>
+          </section>
 
           <!-- Upcoming Jobs -->
           <div class="section">
@@ -111,19 +133,12 @@
               </v-col>
             </v-row>
           </div>
-
-          <!-- Chart (Activity Overview Placeholder) -->
-          <div class="section">
-            <h2 class="section-title">Активности</h2>
-            <v-sheet height="200" class="chart-placeholder d-flex align-center justify-center">
-              <p class="text-grey">📊 Тука можеш да вметнеш график за активности (bar/line chart)</p>
-            </v-sheet>
-          </div>
         </v-container>
       </v-main>
     </div>
   </v-app>
 </template>
+
 
 <script setup>
 import { useRouter } from 'vue-router'
@@ -132,8 +147,8 @@ import { getAuth, onAuthStateChanged } from 'firebase/auth'
 import { collection, query, where, getDocs, deleteDoc, doc } from 'firebase/firestore'
 import { db } from '@/firebase'
 
-
 const router = useRouter()
+const drawer = ref(true)
 
 const username = 'Мајсторе'
 
@@ -163,11 +178,9 @@ const fetchUserServices = async (uid) => {
     const serviceData = docSnap.data()
     let city = 'Непознато'
 
-    // Fetch city from users collection
     try {
       const userQuery = query(collection(db, 'users'), where('uid', '==', uid))
       const userSnap = await getDocs(userQuery)
-
       if (!userSnap.empty) {
         city = userSnap.docs[0].data().city || city
       }
@@ -190,7 +203,6 @@ const deleteService = async (id) => {
   userServices.value = userServices.value.filter(s => s.id !== id)
 }
 
-// ✅ Fetch user services on mount if logged in
 onMounted(() => {
   const auth = getAuth()
   const user = auth.currentUser
@@ -207,96 +219,113 @@ onMounted(() => {
 })
 </script>
 
-
 <style scoped>
 .layout-wrapper {
-  background: #121212;
+  background: linear-gradient(135deg, #121212, #1b1b1b);
   min-height: 100vh;
-  padding: 30px 20px;
+  padding: 40px 24px;
+  font-family: 'Inter', sans-serif;
 }
 
 .dashboard-title {
-  font-size: 2.2rem;
+  font-size: 2.8rem;
   color: #ffc107;
-  font-weight: 800;
-  margin-bottom: 30px;
+  font-weight: 900;
+  margin-bottom: 40px;
+  letter-spacing: -0.5px;
+  text-shadow: 0 0 6px rgba(255, 193, 7, 0.2);
 }
 
 .section {
-  margin-top: 40px;
+  margin-top: 50px;
 }
 
 .section-title {
-  font-size: 1.4rem;
+  font-size: 1.6rem;
   color: #ffc107;
-  font-weight: bold;
-  margin-bottom: 16px;
+  font-weight: 700;
+  margin-bottom: 20px;
+  letter-spacing: -0.3px;
 }
 
 .stat-card {
-  background: #1e1e1e;
-  border-radius: 14px;
-  padding: 20px;
-  color: white;
+  background: rgba(255, 255, 255, 0.05);
+  backdrop-filter: blur(14px);
+  border-radius: 18px;
+  padding: 24px;
   text-align: center;
-  transition: all 0.3s ease;
+  color: white;
+  box-shadow: 0 10px 28px rgba(0, 0, 0, 0.3);
+  transition: all 0.25s ease;
 }
 
 .stat-card:hover {
-  transform: translateY(-5px);
+  transform: scale(1.02);
 }
 
 .stat-number {
-  font-size: 1.8rem;
+  font-size: 2rem;
   font-weight: bold;
+  margin: 8px 0;
 }
 
 .stat-label {
-  font-size: 0.95rem;
-  color: #bbb;
+  font-size: 1rem;
+  color: #ccc;
 }
 
 .status-card {
   display: flex;
   align-items: center;
-  gap: 16px;
+  gap: 20px;
   justify-content: center;
   background-color: #1f1f1f;
+  border-radius: 18px;
+  padding: 20px;
+  box-shadow: 0 8px 18px rgba(0, 0, 0, 0.3);
 }
 
 .status-text {
-  font-size: 1.2rem;
+  font-size: 1.3rem;
   color: #4caf50;
-  font-weight: bold;
+  font-weight: 700;
 }
 
 .status-sub {
-  color: #ccc;
-  font-size: 0.8rem;
-}
-
-.review-card {
-  background-color: #1a1a1a;
-  padding: 16px;
-  border-radius: 12px;
-  border: 1px solid rgba(255, 255, 255, 0.05);
-}
-
-.chart-placeholder {
-  background: #1c1c1c;
-  border-radius: 12px;
+  font-size: 0.85rem;
+  color: #aaa;
 }
 
 .my-service-card {
   background: rgba(255, 255, 255, 0.04);
-  border: 1px solid rgba(255, 255, 255, 0.08);
-  backdrop-filter: blur(10px);
+  border: 1px solid rgba(255, 255, 255, 0.07);
+  border-radius: 16px;
+  padding: 16px;
   color: white;
-  transition: transform 0.3s ease;
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
+  backdrop-filter: blur(10px);
 }
+
 .my-service-card:hover {
-  transform: translateY(-4px);
-  box-shadow: 0 8px 24px rgba(255, 193, 7, 0.15);
+  transform: translateY(-6px);
+  box-shadow: 0 14px 28px rgba(255, 193, 7, 0.2);
+}
+
+.review-card {
+  background: #1e1e1e;
+  padding: 20px;
+  border-radius: 14px;
+  border: 1px solid rgba(255, 255, 255, 0.06);
+  color: white;
+  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.2);
+}
+
+.chart-placeholder {
+  background: #1c1c1c;
+  border-radius: 14px;
+  color: #999;
+  text-align: center;
+  font-style: italic;
 }
 
 </style>

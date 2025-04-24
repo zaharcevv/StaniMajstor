@@ -24,6 +24,7 @@ const searchCity = ref('')
 const currentPage = ref(1)
 const itemsPerPage = 4
 const userDocId = ref(null)
+const dialog = ref(false) // 🔔 Дијалог за најавување
 
 const allServices = ['Електричар', 'Водоводџија', 'Молер', 'Механичар', 'Дрводелец', 'Техничар', 'Инженер', 'Монтер', 'Чистач']
 const cities = ['Скопје', 'Битола', 'Тетово', 'Куманово', 'Прилеп', 'Охрид', 'Гостивар', 'Штип', 'Кавадарци', 'Велес']
@@ -35,7 +36,6 @@ const filteredServicesList = computed(() =>
     (!searchName.value || `${s.name} ${s.lastName}`.toLowerCase().includes(searchName.value.toLowerCase()))
   )
 )
-
 
 const paginatedServices = computed(() => {
   const start = (currentPage.value - 1) * itemsPerPage
@@ -56,7 +56,13 @@ const getJobIcon = (job) => {
 const toggleFavorite = async (service) => {
   const auth = getAuth()
   const currentUser = auth.currentUser
-  if (!currentUser || !userDocId.value) return
+
+  if (!currentUser) {
+    dialog.value = true // 👈 Прикажи дијалог ако не е најавен
+    return
+  }
+
+  if (!userDocId.value) return
 
   const userRef = doc(db, 'users', userDocId.value)
   const currentFavorites = [...favorites.value]
@@ -145,11 +151,8 @@ const loadServices = async () => {
 
 onMounted(async () => {
   const auth = getAuth()
-
-  // Always load services, even if not logged in
   await loadServices()
 
-  // If logged in, load user favorites
   onAuthStateChanged(auth, async (user) => {
     if (user) {
       await loadUserFavorites(user.uid)
@@ -159,11 +162,12 @@ onMounted(async () => {
 </script>
 
 
+
 <template>
   <v-app>
     <section class="search-section">
       <v-container>
-        <div class="header text-center mb-7 animate-header">
+        <div class="header text-center mb-5 animate-header">
           <h1 class="main-title">Најди Мајстор</h1>
           <p class="subtitle-text">Пронајди професионалци по локација и услуга</p>
         </div>
@@ -276,6 +280,26 @@ onMounted(async () => {
           />
         </v-row>
       </v-container>
+
+      <v-dialog v-model="dialog" max-width="420" transition="dialog-bottom-transition">
+  <v-card class="pa-4">
+    <v-card-title class="text-h6 font-weight-bold d-flex align-center text-warning">
+      <v-icon class="me-2" color="warning" size="24">mdi-alert-circle-outline</v-icon>
+      Најава потребна
+    </v-card-title>
+    <v-card-text class="text-white text-body-1 mt-2">
+      Мора да сте најавени за да додадете мајстор во омилени.
+      Ве молиме најавете се или креирајте профил.
+    </v-card-text>
+    <v-card-actions class="d-flex justify-end">
+      <v-btn variant="text" color="white" @click="dialog = false">Подоцна</v-btn>
+      <v-btn color="warning" variant="elevated" @click="router.push('/login')">Најави се</v-btn>
+    </v-card-actions>
+  </v-card>
+</v-dialog>
+
+
+
     </section>
   </v-app>
 </template>
@@ -284,7 +308,7 @@ onMounted(async () => {
 .search-section {
   background: linear-gradient(135deg, #1c1c1c, #101010);
   min-height: 100vh;
-  padding-top: 100px;
+  padding-top: 80px;
   padding-bottom: 60px;
   color: white;
 }
@@ -348,6 +372,13 @@ onMounted(async () => {
 .compact-gap {
   margin-bottom: -35px;
 }
+
+.v-dialog .v-card {
+  background-color: #2c2c2c;
+  border-radius: 14px;
+  box-shadow: 0 12px 28px rgba(0, 0, 0, 0.4);
+}
+
 
 
 </style>

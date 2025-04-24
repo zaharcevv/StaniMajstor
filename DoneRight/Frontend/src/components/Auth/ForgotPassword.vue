@@ -17,7 +17,7 @@
               variant="outlined"
               density="comfortable"
               required
-              class="mb-1"
+              class="address"
             />
 
             <!-- Error or Success Message -->
@@ -118,10 +118,14 @@ const sendResetEmail = async () => {
   color: white;
 }
 .error-message {
-  margin-top: -18px;
-  margin-bottom: 24px;
+  margin-top: 5px;
+  margin-bottom: -7px;
   font-size: 0.9rem;
   color: #ff5252;
   font-weight: 500;
+}
+
+.address{
+  margin-bottom: -20px;
 }
 </style>

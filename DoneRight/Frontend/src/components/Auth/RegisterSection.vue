@@ -143,7 +143,7 @@ const redirectToLogin = () => {
   font-size: 0.9rem;
   font-weight: 500;
   margin-top: -8px;
-  margin-bottom: 16px;
+  margin-bottom: 8px;
   text-align: center;
 }
 .account-link {

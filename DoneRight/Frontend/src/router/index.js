@@ -12,6 +12,7 @@ import ProfilePicturePage from '@/components/sellers/ProfilePicture.vue';
 import UserProfile from '@/components/Auth/UserProfile.vue'
 import Settings from '@/components/common/Settings.vue';
 import HowItWorks from '@/components/HowItWorks/howItWorks.vue'
+import EditService from '@/components/sellers/EditService.vue';
 
 import RegisterSection from '@/components/Auth/RegisterSection.vue';
 import LoginSection from '@/components/Auth/LoginSection.vue';
@@ -36,7 +37,8 @@ const router = createRouter({
     { path: '/settings', component: Settings },
     { path: '/how-it-works', component: HowItWorks},
     { path: '/reset-password', component: ResetPassword},
-    { path: '/forgot-password', component: ForgotPassword}
+    { path: '/forgot-password', component: ForgotPassword},
+    { path: '/edit-service/:id', component: EditService}
   ],
 });
 
