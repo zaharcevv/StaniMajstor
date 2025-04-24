@@ -15,7 +15,33 @@
             <v-select
               v-model="form.service"
               :items="availableServices"
-              label="Изберете услуга"
+              label="Изберете услуги (макс. 3)"
+              multiple
+              color="warning"
+              variant="outlined"
+              density="comfortable"
+              hide-details
+              class="mb-4"
+              :menu-props="{ maxHeight: '200' }"
+              @update:modelValue="handleServiceChange"
+              required
+            />
+
+            <v-text-field
+              v-model="form.phone"
+              label="Телефонски број"
+              color="warning"
+              variant="outlined"
+              density="comfortable"
+              hide-details
+              class="mb-4"
+              required
+            />
+
+            <v-select
+              v-model="form.city"
+              :items="cities"
+              label="Град"
               color="warning"
               variant="outlined"
               density="comfortable"
@@ -55,9 +81,14 @@
               variant="outlined"
               density="comfortable"
               hide-details
-              class="mb-5"
+              class="mb-3"
               required
             />
+
+            <!-- Error message -->
+            <p v-if="errorMessage" class="error-text text-center mt-4 mb-4">
+              {{ errorMessage }}
+            </p>
 
             <v-btn
               type="submit"
@@ -65,6 +96,7 @@
               class="mt-2"
               block
               size="large"
+              :loading="loading"
             >
               Поднеси профил
             </v-btn>
@@ -82,6 +114,23 @@
         </v-card>
       </v-container>
     </div>
+
+    <!-- Dialog: Upgrade for more than 3 services -->
+    <v-dialog v-model="showUpgradeDialog" max-width="420" persistent transition="dialog-bottom-transition">
+      <v-card class="pa-4 upgrade-dialog">
+        <v-card-title class="text-h6 font-weight-bold text-warning">
+          Надградба потребна
+        </v-card-title>
+        <v-card-text class="text-white text-body-1 mt-2">
+          Може да изберете најмногу 3 услуги бесплатно.<br />
+          За повеќе, ве молиме контактирајте не за надградба на профилот.
+        </v-card-text>
+        <v-card-actions class="d-flex justify-end mt-3">
+          <v-btn variant="text" class="text-white" @click="showUpgradeDialog = false">Затвори</v-btn>
+          <v-btn color="warning" variant="elevated" @click="contactSupport">Контактирај не</v-btn>
+        </v-card-actions>
+      </v-card>
+    </v-dialog>
   </v-app>
 </template>
 
@@ -96,68 +145,91 @@ const router = useRouter()
 const auth = getAuth()
 
 const form = ref({
-  service: '',
+  service: [],
   description: '',
   experience: '',
   price: '',
+  phone: '',
+  city: '',
 })
 
 const availableServices = [
-  'Електричар',
-  'Водоводџија',
-  'Каменорезец',
-  'Автомеханичар',
-  'Дизајн на ентериери',
-  'Фотограф',
-  'Писател',
-  'Илустратор',
-  'Консултант',
-  'Копирајтер',
-  'Преведувач',
-  'Графички Дизајн',
-  'Брендинг Специјалист',
-  'Видео Продуцент',
-  'Друго',
+  'Електричар', 'Водоводџија', 'Каменорезец', 'Автомеханичар',
+  'Дизајн на ентериери', 'Фотограф', 'Писател', 'Илустратор',
+  'Консултант', 'Копирајтер', 'Преведувач', 'Графички Дизајн',
+  'Брендинг Специјалист', 'Видео Продуцент', 'Друго'
 ]
 
+const cities = [
+  'Скопје', 'Битола', 'Тетово', 'Куманово', 'Прилеп', 'Охрид', 'Гостивар', 'Штип',
+  'Кавадарци', 'Велес', 'Кочани', 'Струмица', 'Гевгелија', 'Кичево', 'Струга',
+  'Неготино', 'Ресен', 'Кратово', 'Крива Паланка', 'Дебар', 'Берово', 'Делчево',
+  'Виница', 'Пробиштип', 'Свети Николе', 'Богданци', 'Валандово', 'Демир Хисар',
+  'Македонски Брод', 'Крушево', 'Пехчево', 'Радовиш'
+]
+
+const showUpgradeDialog = ref(false)
+const errorMessage = ref('')
+const loading = ref(false)
+
+const handleServiceChange = (selected) => {
+  if (selected.length > 3) {
+    form.value.service = selected.slice(0, 3)
+    showUpgradeDialog.value = true
+    return
+  }
+  form.value.service = selected
+}
+
 const submitMasterProfile = async () => {
-  if (!form.value.service) {
-    alert('Изберете услуга.')
+  errorMessage.value = ''
+  loading.value = true
+
+  const { service, description, experience, price, phone, city } = form.value
+
+  // Валидација за сите полиња
+  if (!service.length || !description || !experience || !price || !phone || !city) {
+    errorMessage.value = 'Ве молиме пополнете ги сите полиња.'
+    loading.value = false
     return
   }
 
   const user = auth.currentUser
   if (!user) {
-    alert('User is not logged in')
+    errorMessage.value = 'Корисникот не е најавен.'
+    loading.value = false
     return
   }
 
   try {
-    // 1. Add service
     const docRef = await addDoc(collection(db, 'services'), {
       ...form.value,
       userId: user.uid,
       createdAt: Timestamp.fromDate(new Date()),
     })
+
     console.log('Service added with ID:', docRef.id)
 
-    // 2. Update user profile to set isSeller: true
-    const userDocRef = doc(db, 'users', user.uid)
-    await updateDoc(userDocRef, { isSeller: true })
+    await updateDoc(doc(db, 'users', user.uid), { isSeller: true })
 
-    // 3. Redirect
     router.push('/success')
   } catch (e) {
     console.error('Error:', e)
-    alert('Настана грешка. Обидете се повторно.')
+    errorMessage.value = 'Настана грешка. Обидете се повторно.'
+  } finally {
+    loading.value = false
   }
 }
 
+
 const redirectToPreviousForm = () => {
-  router.push('/apply')
+  router.push('/')
+}
+
+const contactSupport = () => {
+  router.push('/upgrade')
 }
 </script>
-
 
 <style scoped>
 .background {
@@ -189,5 +261,14 @@ const redirectToPreviousForm = () => {
   max-width: 420px;
   width: 100%;
   color: white;
+}
+.upgrade-dialog {
+  background-color: #2c2c2c;
+  border-radius: 16px;
+}
+.error-text {
+  color: #ff5252;
+  font-size: 0.9rem;
+  font-weight: 500;
 }
 </style>

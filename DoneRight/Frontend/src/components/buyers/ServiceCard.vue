@@ -31,10 +31,11 @@ const cities = ['Скопје', 'Битола', 'Тетово', 'Куманов�
 const filteredServicesList = computed(() =>
   services.value.filter(s =>
     (!searchCity.value || s.location === searchCity.value) &&
-    (!searchService.value || s.job.toLowerCase().includes(searchService.value.toLowerCase())) &&
+    (!searchService.value || String(s.job || '').toLowerCase().includes(searchService.value.toLowerCase())) &&
     (!searchName.value || `${s.name} ${s.lastName}`.toLowerCase().includes(searchName.value.toLowerCase()))
   )
 )
+
 
 const paginatedServices = computed(() => {
   const start = (currentPage.value - 1) * itemsPerPage

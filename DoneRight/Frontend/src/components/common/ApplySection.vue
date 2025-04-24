@@ -16,7 +16,7 @@ onMounted(() => {
 
 const handleJoinClick = () => {
   if (isLoggedIn.value) {
-    router.push('/apply') // веќе логнат – оди директно на апликацијата
+    router.push('/next-form') // веќе логнат – оди директно на апликацијата
   } else {
     router.push('/register') // не е логнат – оди на регистрација
   }
