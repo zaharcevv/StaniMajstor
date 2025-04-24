@@ -11,47 +11,35 @@ const form = ref({
   firstName: '',
   lastName: '',
   email: '',
-  phone: '',
-  city: '',
   password: '',
 })
 
 const errorMessage = ref('')
 
-const cities = [
-  'Скопје', 'Битола', 'Тетово', 'Куманово', 'Прилеп', 'Охрид', 'Гостивар', 'Штип',
-  'Кавадарци', 'Велес', 'Кочани', 'Струмица', 'Гевгелија', 'Кичево', 'Струга',
-  'Неготино', 'Ресен', 'Кратово', 'Крива Паланка', 'Дебар', 'Берово', 'Делчево',
-  'Виница', 'Пробиштип', 'Свети Николе', 'Богданци', 'Валандово', 'Демир Хисар',
-  'Македонски Брод', 'Крушево', 'Пехчево', 'Радовиш'
-]
-
 const submitApplication = async () => {
   errorMessage.value = ''
 
-  const { firstName, lastName, email, phone, city, password } = form.value
+  const { firstName, lastName, email, password } = form.value
 
-  if (!firstName || !lastName || !email || !phone || !city || !password) {
-  errorMessage.value = 'Пополнете ги сите полиња.'
-  return
-}
+  if (!firstName || !lastName || !email || !password) {
+    errorMessage.value = 'Пополнете ги сите полиња.'
+    return
+  }
 
-if (!email.includes('@')) {
-  errorMessage.value = 'Внеси валидна емајл адреса (пример: user@example.com).'
-  return
-}
+  if (!email.includes('@')) {
+    errorMessage.value = 'Внеси валидна емајл адреса (пример: user@example.com).'
+    return
+  }
 
-if (password.length < 6) {
-  errorMessage.value = 'Лозинката мора да има минимум 6 карактери.'
-  return
-}
-
+  if (password.length < 6) {
+    errorMessage.value = 'Лозинката мора да има минимум 6 карактери.'
+    return
+  }
 
   const auth = getAuth()
 
   try {
     const userCredential = await createUserWithEmailAndPassword(auth, email, password)
-
     const user = userCredential.user
 
     await updateProfile(user, {
@@ -63,8 +51,6 @@ if (password.length < 6) {
       email,
       firstName,
       lastName,
-      phone,
-      city,
       isSeller: false,
     })
 
@@ -83,6 +69,7 @@ const redirectToLogin = () => {
 }
 </script>
 
+
 <template>
   <v-app>
     <div class="background">
@@ -97,25 +84,23 @@ const redirectToLogin = () => {
           </v-card-subtitle>
 
           <v-form @submit.prevent="submitApplication" class="px-4">
-            <v-text-field v-model="form.firstName" label="Име" variant="outlined" density="comfortable" color="warning" class="mb-4" hide-details required />
-            <v-text-field v-model="form.lastName" label="Презиме" variant="outlined" density="comfortable" color="warning" class="mb-4" hide-details required />
-            <v-text-field v-model="form.email" label="Емајл адреса" type="email" variant="outlined" density="comfortable" color="warning" class="mb-4" hide-details required />
-            <v-text-field v-model="form.phone" label="Телефонски број" type="text" variant="outlined" density="comfortable" color="warning" class="mb-4" hide-details required />
-            <v-select v-model="form.city" :items="cities" label="Град" variant="outlined" density="comfortable" color="warning" class="mb-4" hide-details required />
-            <v-text-field v-model="form.password" label="Лозинка" type="password" variant="outlined" density="comfortable" color="warning" class="mb-5" hide-details required />
+  <v-text-field v-model="form.firstName" label="Име" variant="outlined" density="comfortable" color="warning" class="mb-4" hide-details required />
+  <v-text-field v-model="form.lastName" label="Презиме" variant="outlined" density="comfortable" color="warning" class="mb-4" hide-details required />
+  <v-text-field v-model="form.email" label="Емајл адреса" type="email" variant="outlined" density="comfortable" color="warning" class="mb-4" hide-details required />
+  <v-text-field v-model="form.password" label="Лозинка" type="password" variant="outlined" density="comfortable" color="warning" class="mb-5" hide-details required />
 
-            <!-- Error message -->
-            <p v-if="errorMessage" class="error-text">{{ errorMessage }}</p>
+  <p v-if="errorMessage" class="error-text">{{ errorMessage }}</p>
 
-            <div class="account-link text-white text-caption mb-5">
-              Имате веќе сметка?
-              <span class="link" @click="redirectToLogin">Логирајте се тука</span>
-            </div>
+  <div class="account-link text-white text-caption mb-5">
+    Имате веќе сметка?
+    <span class="link" @click="redirectToLogin">Логирајте се тука</span>
+  </div>
 
-            <v-btn type="submit" color="warning" block size="large" class="text-white font-weight-bold">
-              Продолжи
-            </v-btn>
-          </v-form>
+  <v-btn type="submit" color="warning" block size="large" class="text-white font-weight-bold">
+    Продолжи
+  </v-btn>
+</v-form>
+  
         </v-card>
       </v-container>
     </div>
