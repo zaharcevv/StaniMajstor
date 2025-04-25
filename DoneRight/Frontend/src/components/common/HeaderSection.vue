@@ -34,21 +34,12 @@ onMounted(() => {
 })
 </script>
 
-
 <template>
   <v-app-bar app flat height="96" class="custom-app-bar">
-    <!-- Logo -->
     <v-toolbar-title class="d-flex align-center">
       <RouterLink to="/" class="d-inline-flex align-center text-decoration-none">
-        <img
-          src="@/assets/logo.png"
-          alt="Најди Мајстор"
-          height="50"
-          class="mr-3"
-        />
-        <span class="text-white font-weight-bold text-h5 d-none d-sm-inline">
-          DoneRight
-        </span>
+        <img src="@/assets/logo.png" alt="Најди Мајстор" height="50" class="mr-3" />
+        <span class="text-white font-weight-bold text-h5 d-none d-sm-inline">DoneRight</span>
       </RouterLink>
     </v-toolbar-title>
 
@@ -58,73 +49,26 @@ onMounted(() => {
     <div class="d-none d-md-flex align-center gap-6">
       <v-btn to="/" variant="text" class="nav-btn">Почетна</v-btn>
       <v-btn to="/services" variant="text" class="nav-btn">Услуги</v-btn>
+      <v-btn v-if="isLoggedIn" to="/favourite" variant="text" class="nav-btn">Омилени</v-btn>
+      <v-btn v-if="isLoggedIn && isSeller" to="/seller-dashboard" variant="text" class="nav-btn">Дашборд</v-btn>
+      <v-btn v-else-if="isLoggedIn && !isSeller" to="/how-it-works" variant="text" class="nav-btn">Стани Мајстор</v-btn>
 
-      <!-- CONDITIONAL NAVIGATION -->
-      <v-btn
-        v-if="isLoggedIn"
-        to="/favourite"
-        variant="text"
-        class="nav-btn"
-      >
-        Омилени
-      </v-btn>
-
-      <v-btn
-        v-if="isLoggedIn && isSeller"
-        to="/seller-dashboard"
-        variant="text"
-        class="nav-btn"
-      >
-        Дашборд
-      </v-btn>
-
-      <v-btn
-        v-else-if="!isLoggedIn || !isSeller"
-        to="/how-it-works"
-        variant="text"
-        class="nav-btn"
-      >
-        Стани мајстор
-      </v-btn>
-
-      <!-- Auth Buttons -->
-      <v-btn
-        v-if="!isLoggedIn"
-        to="/login"
-        class="login-btn-gradient text-capitalize"
-        height="44"
-        rounded
-        elevation="4"
-      >
+      <v-btn v-if="!isLoggedIn" to="/login" class="login-btn-gradient text-capitalize" height="44" rounded elevation="4">
         <v-icon start size="20">mdi-login</v-icon>
         <span class="font-weight-bold">Најави се</span>
       </v-btn>
 
-      <v-btn
-        v-else
-        to="/user-profile"
-        icon
-        class="text-yellow-darken-2"
-      >
+      <v-btn v-else to="/user-profile" icon class="text-yellow-darken-2">
         <v-icon size="32">mdi-account</v-icon>
       </v-btn>
     </div>
 
     <!-- Mobile Nav Toggle -->
-    <v-app-bar-nav-icon
-      @click="drawer = !drawer"
-      class="d-md-none text-yellow-darken-2"
-    />
+    <v-app-bar-nav-icon @click="drawer = !drawer" class="d-md-none text-yellow-darken-2" />
   </v-app-bar>
 
   <!-- Mobile Drawer -->
-  <v-navigation-drawer
-    v-model="drawer"
-    app
-    temporary
-    color="black"
-    class="mobile-drawer"
-  >
+  <v-navigation-drawer v-model="drawer" app temporary color="black" class="mobile-drawer">
     <v-list nav dense class="text-white">
       <v-list-item to="/" @click="drawer = false">
         <v-list-item-title>Почетна</v-list-item-title>
@@ -132,18 +76,14 @@ onMounted(() => {
       <v-list-item to="/services" @click="drawer = false">
         <v-list-item-title>Услуги</v-list-item-title>
       </v-list-item>
-
-      <!-- CONDITIONAL NAVIGATION -->
-      <v-list-item v-if="isLoggedIn && isSeller" to="/favourite" @click="drawer = false">
+      <v-list-item v-if="isLoggedIn" to="/favourite" @click="drawer = false">
         <v-list-item-title>Омилени</v-list-item-title>
       </v-list-item>
-
       <v-list-item v-if="isLoggedIn && isSeller" to="/seller-dashboard" @click="drawer = false">
-        <v-list-item-title>Табла</v-list-item-title>
+        <v-list-item-title>Дашборд</v-list-item-title>
       </v-list-item>
-
       <v-list-item v-else-if="isLoggedIn && !isSeller" to="/how-it-works" @click="drawer = false">
-        <v-list-item-title>Стани мајстор</v-list-item-title>
+        <v-list-item-title>Стани Мајстор</v-list-item-title>
       </v-list-item>
 
       <v-list-item v-if="!isLoggedIn" to="/login" @click="drawer = false">
@@ -156,7 +96,6 @@ onMounted(() => {
     </v-list>
   </v-navigation-drawer>
 </template>
-
 
 <style scoped>
 .custom-app-bar {
@@ -211,7 +150,6 @@ onMounted(() => {
   box-shadow: 0 6px 15px rgba(255, 193, 7, 0.4);
 }
 
-/* Drawer Animation */
 .mobile-drawer {
   transition: transform 0.4s ease;
 }

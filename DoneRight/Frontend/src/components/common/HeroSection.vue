@@ -1,9 +1,8 @@
 <script setup>
+import router from '@/router';
+
 const scrollToNext = () => {
-  const next = document.getElementById('next-section')
-  if (next) {
-    next.scrollIntoView({ behavior: 'smooth', block: 'start' })
-  }
+  router.push('/services')
 }
 </script>
 
@@ -27,7 +26,7 @@ const scrollToNext = () => {
         class="hero-icon-btn"
         @click="scrollToNext"
       >
-        <v-icon size="36" class="hero-icon">mdi-magnify</v-icon>
+        <v-icon size="31" class="hero-icon">mdi-magnify</v-icon>
       </v-btn>
     </div>
   </div>

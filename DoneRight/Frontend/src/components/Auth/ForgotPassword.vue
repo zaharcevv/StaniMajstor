@@ -50,6 +50,8 @@
 <script setup>
 import { ref } from 'vue'
 import { getAuth, sendPasswordResetEmail } from 'firebase/auth'
+import { db } from '@/firebase'
+import { collection, query, where, getDocs } from 'firebase/firestore'
 
 const email = ref('')
 const errorMessage = ref('')
@@ -61,23 +63,50 @@ const snackbar = ref({
   color: 'success'
 })
 
+// Проверка дали постои емаил во users колекцијата
+const checkIfEmailExists = async (emailToCheck) => {
+  const q = query(collection(db, 'users'), where('email', '==', emailToCheck))
+  const snapshot = await getDocs(q)
+  return !snapshot.empty
+}
+
 const sendResetEmail = async () => {
   const auth = getAuth()
   errorMessage.value = ''
+  const trimmedEmail = email.value.trim()
+
+  if (!trimmedEmail) {
+    errorMessage.value = 'Внесете емаил адреса.'
+    return
+  }
+
+  if (!trimmedEmail.includes('@')) {
+    errorMessage.value = 'Внесете валидна емаил адреса.'
+    return
+  }
+
+  loading.value = true
+
   try {
-    loading.value = true
-    await sendPasswordResetEmail(auth, email.value)
+    const exists = await checkIfEmailExists(trimmedEmail)
+
+    if (!exists) {
+      errorMessage.value = 'Корисник со таа емаил адреса не постои.'
+      return
+    }
+
+    await sendPasswordResetEmail(auth, trimmedEmail)
+
     snackbar.value = {
       show: true,
       message: '✅ Провери го емаилот за линк за ресет.',
       color: 'success'
     }
+
     email.value = ''
   } catch (error) {
     console.error(error)
-    errorMessage.value = '❌ ' + (error.code === 'auth/user-not-found'
-      ? 'Корисник со таа емаил адреса не постои.'
-      : 'Настана грешка. Пробај повторно.')
+    errorMessage.value = 'Настана грешка. Пробај повторно.'
   } finally {
     loading.value = false
   }
@@ -124,8 +153,7 @@ const sendResetEmail = async () => {
   color: #ff5252;
   font-weight: 500;
 }
-
-.address{
+.address {
   margin-bottom: -20px;
 }
 </style>

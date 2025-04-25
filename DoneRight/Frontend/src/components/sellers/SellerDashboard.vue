@@ -8,7 +8,7 @@
             <v-list-item-icon><v-icon color="yellow">mdi-view-dashboard</v-icon></v-list-item-icon>
             <v-list-item-title class="text-white">Дашборд</v-list-item-title>
           </v-list-item>
-          <v-list-item @click="router.push('/profile')">
+          <v-list-item @click="router.push('/user-profile')">
             <v-list-item-icon><v-icon color="yellow">mdi-account</v-icon></v-list-item-icon>
             <v-list-item-title class="text-white">Профил</v-list-item-title>
           </v-list-item>
@@ -24,7 +24,7 @@
           <v-btn icon @click="drawer = !drawer" class="mb-4">
             <v-icon color="white">mdi-menu</v-icon>
           </v-btn>
-          <h1 class="dashboard-title">Добредојде назад, {{ username }} 👋</h1>
+          <h1 class="dashboard-title">Добредојде назад, {{ firstName }} 👋</h1>
 
           <!-- Status & Quick Info -->
           <v-row>
@@ -122,7 +122,7 @@
           <div class="section">
             <h2 class="section-title">Најнови рецензии</h2>
             <v-row>
-              <v-col cols="12" sm="6" md="4" v-for="r in latestReviews" :key="r.name">
+              <v-col cols="12" sm="6" md="4" v-for="r in reviews" :key="r.id">
                 <v-card class="review-card">
                   <div class="d-flex justify-space-between align-center mb-2">
                     <strong>{{ r.name }}</strong>
@@ -139,7 +139,6 @@
   </v-app>
 </template>
 
-
 <script setup>
 import { useRouter } from 'vue-router'
 import { ref, onMounted } from 'vue'
@@ -149,8 +148,9 @@ import { db } from '@/firebase'
 
 const router = useRouter()
 const drawer = ref(true)
-
-const username = 'Мајсторе'
+const username = ref('')
+const firstName = ref('')
+const reviews = ref([])
 
 const metrics = [
   { title: 'Приходи овој месец', value: '$2,340', icon: 'mdi-cash', color: 'green' },
@@ -161,11 +161,6 @@ const metrics = [
 const upcomingJobs = [
   { id: 1, client: 'Јана', service: 'Електричар', date: '25.04.2025', location: 'Скопје', status: 'Потврдено', statusColor: 'green' },
   { id: 2, client: 'Марко', service: 'Водовод', date: '27.04.2025', location: 'Битола', status: 'Во тек', statusColor: 'blue' }
-]
-
-const latestReviews = [
-  { name: 'Стефан', rating: 5, comment: 'Супер работа, професионално и брзо!' },
-  { name: 'Марија', rating: 4, comment: 'Малку доцнеше, но добра изведба.' }
 ]
 
 const userServices = ref([])
@@ -182,10 +177,12 @@ const fetchUserServices = async (uid) => {
       const userQuery = query(collection(db, 'users'), where('uid', '==', uid))
       const userSnap = await getDocs(userQuery)
       if (!userSnap.empty) {
-        city = userSnap.docs[0].data().city || city
+        const userData = userSnap.docs[0].data()
+        city = userData.city || city
+        firstName.value = userData.firstName || 'Мајсторе'
       }
     } catch (error) {
-      console.error('Error fetching city:', error)
+      console.error('Error fetching city or name:', error)
     }
 
     return {
@@ -198,6 +195,31 @@ const fetchUserServices = async (uid) => {
   userServices.value = enriched
 }
 
+const fetchUserReviews = async (uid) => {
+  try {
+    const q = query(collection(db, 'reviews'), where('sellerId', '==', uid))
+    const snapshot = await getDocs(q)
+
+    if (snapshot.empty) {
+      console.log('Нема рецензии за овој корисник.')
+    }
+
+    reviews.value = snapshot.docs.map(doc => {
+      const data = doc.data()
+      console.log('Рецензија:', data)  // Debug log
+      return {
+        id: doc.id,
+        name: data.name || 'Клиент',
+        rating: data.rating || 0,
+        comment: data.comment || 'Без коментар'
+      }
+    })
+  } catch (err) {
+    console.error('Грешка при повлекување рецензии:', err)
+  }
+}
+
+
 const deleteService = async (id) => {
   await deleteDoc(doc(db, 'services', id))
   userServices.value = userServices.value.filter(s => s.id !== id)
@@ -207,18 +229,23 @@ onMounted(() => {
   const auth = getAuth()
   const user = auth.currentUser
 
+  const init = (u) => {
+    username.value = u.displayName || ''
+    fetchUserServices(u.uid)
+    fetchUserReviews(u.uid)
+  }
+
   if (user) {
-    fetchUserServices(user.uid)
+    init(user)
   } else {
     onAuthStateChanged(auth, (user) => {
       if (user) {
-        fetchUserServices(user.uid)
+        init(user)
       }
     })
   }
 })
 </script>
-
 <style scoped>
 .layout-wrapper {
   background: linear-gradient(135deg, #121212, #1b1b1b);

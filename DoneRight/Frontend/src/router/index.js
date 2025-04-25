@@ -8,13 +8,17 @@ import EditProfile from '@/components/Auth/EditProfile.vue';
 import SellerDashboard from '@/components/sellers/SellerDashboard.vue';
 import ServiceDetails from '@/components/buyers/ServiceDetails.vue';
 import SuccessPage from '@/components/sellers/SuccessPage.vue';
+import SuccessService from '@/components/sellers/SuccessService.vue';
 import ProfilePicturePage from '@/components/sellers/ProfilePicture.vue';
 import UserProfile from '@/components/Auth/UserProfile.vue'
 import Settings from '@/components/common/Settings.vue';
 import HowItWorks from '@/components/HowItWorks/howItWorks.vue'
 import EditService from '@/components/sellers/EditService.vue';
 
+import ChooseRole from '@/components/Auth/ChooseRole.vue';
+import RegisterMaster from '@/components/Auth/Masters/RegisterMaster.vue';
 import RegisterSection from '@/components/Auth/RegisterSection.vue';
+import UpgradeToSeller from '@/components/Auth/Masters/UpgradeToSeller.vue';
 import LoginSection from '@/components/Auth/LoginSection.vue';
 import ResetPassword from '@/components/Auth/ResetPassword.vue';
 import ForgotPassword from '@/components/Auth/ForgotPassword.vue';
@@ -38,8 +42,15 @@ const router = createRouter({
     { path: '/how-it-works', component: HowItWorks},
     { path: '/reset-password', component: ResetPassword},
     { path: '/forgot-password', component: ForgotPassword},
-    { path: '/edit-service/:id', component: EditService}
+    { path: '/edit-service/:id', component: EditService},
+    { path: '/choose-role', component: ChooseRole},
+    { path: '/register-master', component: RegisterMaster},
+    { path: '/upgrade-to-master', component: UpgradeToSeller},
+    { path: '/success-service', component: SuccessService}
   ],
+    scrollBehavior() {
+      return { top: 0 }     // 🔽 Скрол до врвот на секоја навигација
+    }
 });
 
 export default router;

@@ -30,7 +30,7 @@
   density="comfortable"
   :append-inner-icon="showConfirm ? 'mdi-eye-off' : 'mdi-eye'"
   @click:append-inner="showConfirm = !showConfirm"
-  class="mb-0"
+  class="zoz"
 />
 
 <!-- Error message directly under second input -->
@@ -44,7 +44,7 @@
               color="warning"
               block
               size="large"
-              class="mt-4 font-weight-bold text-black"
+              class="font-weight-bold text-black"
               :loading="loading"
             >
                Ажурирај лозинка
@@ -165,12 +165,16 @@ const changePassword = async () => {
   margin-bottom: -10px;
 }
 
+.zoz{
+  margin-bottom: -8px;
+}
+
 .error-message {
   margin-top: -16px;
   font-size: 0.9rem;
   color: #ff5252; /* Vuetify црвена */
   font-weight: 500;
-  margin-bottom: 25px;
+  margin-bottom: 6px;
 }
 
 </style>

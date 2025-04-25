@@ -188,7 +188,7 @@ onMounted(async () => {
         </v-row>
 
         <!-- Filters -->
-        <v-row justify="center" class="mb-3 gap-inputs">
+        <v-row justify="center" class="mb-3 gap-inputs" >
           <v-col cols="12" md="3">
             <v-autocomplete
               v-model="searchService"
@@ -291,7 +291,7 @@ onMounted(async () => {
       Мора да сте најавени за да додадете мајстор во омилени.
       Ве молиме најавете се или креирајте профил.
     </v-card-text>
-    <v-card-actions class="d-flex justify-end">
+    <v-card-actions clas  s="d-flex justify-end">
       <v-btn variant="text" color="white" @click="dialog = false">Подоцна</v-btn>
       <v-btn color="warning" variant="elevated" @click="router.push('/login')">Најави се</v-btn>
     </v-card-actions>
@@ -378,7 +378,6 @@ onMounted(async () => {
   border-radius: 14px;
   box-shadow: 0 12px 28px rgba(0, 0, 0, 0.4);
 }
-
 
 
 </style>

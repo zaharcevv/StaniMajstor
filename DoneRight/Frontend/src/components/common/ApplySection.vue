@@ -29,8 +29,9 @@ const handleJoinClick = () => {
     <div class="content">
       <div class="left-content">
         <div class="header">
-          <font-awesome-icon :icon="['fas', 'briefcase']" class="brief-case-icon" />
-          <h1>Зошто да станеш мајстор?</h1>
+
+          <h1>Зошто да станеш мајстор?      <font-awesome-icon :icon="['fas', 'briefcase']" class="brief-case-icon" /></h1>
+               
         </div>
         <p>
           Дали си професионалец кој сака да ја прошири својата кариера и да се поврзе со повеќе клиенти?
@@ -114,7 +115,7 @@ const handleJoinClick = () => {
 }
 
 .brief-case-icon {
-  font-size: 4rem;
+  font-size: 3rem;
   color: #ffc107;
 }
 

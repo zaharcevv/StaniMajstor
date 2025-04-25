@@ -54,14 +54,16 @@ const submitApplication = async () => {
       isSeller: false,
     })
 
-    router.push('/profile-picture')
+    router.push('/')
   } catch (error) {
-    if (error.code === 'auth/invalid-email') {
-      errorMessage.value = 'Внеси валидна емајл адреса (пример: user@example.com).'
-    } else {
-      errorMessage.value = 'Грешка при регистрација: ' + error.message
-    }
+  if (error.code === 'auth/invalid-email') {
+    errorMessage.value = 'Внеси валидна емајл адреса (пример: user@example.com).'
+  } else if (error.code === 'auth/email-already-in-use') {
+    errorMessage.value = 'Оваа емајл адреса веќе е користена. Обиди се со друга адреса или логирај се.'
+  } else {
+    errorMessage.value = 'Грешка при регистрација: ' + error.message
   }
+}
 }
 
 const redirectToLogin = () => {

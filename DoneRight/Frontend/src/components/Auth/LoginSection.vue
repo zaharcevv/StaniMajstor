@@ -98,10 +98,6 @@
     </v-card-actions>
   </v-card>
 </v-dialog>
-
-
-
-
       </v-container>
     </div>
   </v-app>
@@ -131,36 +127,43 @@ const showResetDialog = ref(false)
 const showBlockedDialog = ref(false)
 
 const redirectToForgot = () => router.push('/forgot-password')
-const redirectToRegister = () => router.push('/register')
+const redirectToRegister = () => router.push('/choose-role')
 
 const handleLogin = async () => {
   const auth = getAuth()
   loading.value = true
   errorMessage.value = ''
 
-  // BLOCK after 7th attempt
+  const email = form.value.email.trim()
+  const password = form.value.password
+
+  // Блокирај ако веќе има 7 обиди
   if (loginAttempts.value >= 7) {
     showBlockedDialog.value = true
     loading.value = false
     return
   }
 
+  // ✅ Валидација: ако емаил е празен или невалиден
+  if (!email || !email.includes('@')) {
+    errorMessage.value = 'Внесете валидна емајл адреса.'
+    loading.value = false
+    return
+  }
   try {
     const persistence = rememberMe.value ? browserLocalPersistence : browserSessionPersistence
     await setPersistence(auth, persistence)
 
-    await signInWithEmailAndPassword(auth, form.value.email, form.value.password)
+    await signInWithEmailAndPassword(auth, email, password)
 
-    // success: reset attempts
+    // Успешна најава: ресетирај обиди
     loginAttempts.value = 0
     router.push('/')
   } catch (err) {
+    // 👉 само тука зголемуваш обиди!
     loginAttempts.value++
 
     switch (err.code) {
-      case 'auth/invalid-email':
-        errorMessage.value = 'Внеси валидна емајл адреса.'
-        break
       case 'auth/user-not-found':
         errorMessage.value = 'Нема корисник со таа емајл адреса.'
         break
