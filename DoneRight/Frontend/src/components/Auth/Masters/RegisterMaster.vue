@@ -73,6 +73,7 @@ const form = ref({
 })
 
 const errorMessage = ref('')
+const createdUserUid = ref(null) // Store the user ID after step 1
 
 const availableServices = [
   'Електричар', 'Водоводџија', 'Каменорезец', 'Автомеханичар',
@@ -81,7 +82,7 @@ const availableServices = [
 
 const cities = ['Скопје', 'Битола', 'Тетово', 'Прилеп', 'Охрид']
 
-const nextStep = () => {
+const nextStep = async () => {
   const { firstName, lastName, email, password } = form.value
   if (!firstName || !lastName || !email || !password) {
     errorMessage.value = 'Пополнете ги сите полиња.'
@@ -96,20 +97,6 @@ const nextStep = () => {
     return
   }
   errorMessage.value = ''
-  step.value++
-}
-
-const goBack = () => {
-  errorMessage.value = ''
-  step.value--
-}
-
-const submitApplication = async () => {
-  const { firstName, lastName, email, password, service, description, experience, price, phone, city } = form.value
-  if (!service || !description || !experience || !price || !phone || !city) {
-    errorMessage.value = 'Пополнете ги сите полиња.'
-    return
-  }
 
   const auth = getAuth()
   try {
@@ -125,21 +112,14 @@ const submitApplication = async () => {
       email,
       firstName,
       lastName,
-      phone,
-      city,
-      isSeller: true
+      isSeller: true,
+      phone: '',
+      city: '',
+      profilePicture: '',
     })
 
-    await setDoc(doc(db, 'services', user.uid), {
-      userId: user.uid,
-      service,
-      description,
-      experience,
-      price,
-      createdAt: new Date()
-    })
-
-    router.push('/success')
+    createdUserUid.value = user.uid
+    step.value++
   } catch (error) {
     if (error.code === 'auth/email-already-in-use') {
       errorMessage.value = 'Оваа емајл адреса веќе е користена.'
@@ -149,10 +129,49 @@ const submitApplication = async () => {
   }
 }
 
+const goBack = () => {
+  errorMessage.value = ''
+  step.value--
+}
+
+const submitApplication = async () => {
+  const { service, description, experience, price, phone, city } = form.value
+
+  if (!service || !description || !experience || !price || !phone || !city) {
+    errorMessage.value = 'Пополнете ги сите полиња.'
+    return
+  }
+
+  if (!createdUserUid.value) {
+    errorMessage.value = 'Грешка: корисникот не е креиран.'
+    return
+  }
+
+  try {
+    // Update the user profile with extra data (Step 2)
+    await setDoc(doc(db, 'users', createdUserUid.value), {
+      uid: createdUserUid.value,
+      email: form.value.email,
+      firstName: form.value.firstName,
+      lastName: form.value.lastName,
+      phone,
+      city,
+      isSeller: true,
+      profilePicture: '',
+    })
+
+    // (Later) Save master-specific data if you want into another collection
+    router.push('/success')
+  } catch (error) {
+    errorMessage.value = 'Грешка при ажурирање на профилот: ' + error.message
+  }
+}
+
 const redirectToLogin = () => {
   router.push('/login')
 }
 </script>
+
 
 <style scoped>
 .background {

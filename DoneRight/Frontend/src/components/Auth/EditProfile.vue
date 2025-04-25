@@ -102,6 +102,7 @@
 <script setup>
 import { ref, onMounted } from 'vue'
 import { useRouter } from 'vue-router'
+import { setDoc } from 'firebase/firestore'
 import { getAuth, onAuthStateChanged, updateEmail } from 'firebase/auth'
 import {
   collection, getDocs, query, where, doc, updateDoc, getDoc
@@ -164,9 +165,11 @@ const handleImageChange = async (event) => {
     const url = await getDownloadURL(fileRef)
     profile.value.profilePicture = url
 
-    await updateDoc(doc(db, 'userProfilePictures', user.uid), {
+    // ✅ Create or update the user's profile picture document safely
+    await setDoc(doc(db, 'userProfilePictures', user.uid), {
       profilePicture: url
-    })
+    }, { merge: true })
+
   } catch (err) {
     console.error('Error uploading image:', err)
     alert('Неуспешно поставување на слика.')
