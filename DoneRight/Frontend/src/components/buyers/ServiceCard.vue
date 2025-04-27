@@ -159,6 +159,14 @@ onMounted(async () => {
     }
   })
 })
+
+const scrollToTop = () => {
+  window.scrollTo({
+    top: 0,
+    behavior: 'smooth'
+  })
+}
+
 </script>
 
 
@@ -271,11 +279,12 @@ onMounted(async () => {
         <!-- Pagination -->
         <v-row justify="center" class="mt-6">
           <v-pagination
-            v-model="currentPage"
-            :length="pageCount"
-            color="yellow-darken-2"
-            total-visible="5"
-          />
+  v-model="currentPage"
+  :length="pageCount"
+  color="yellow-darken-2"
+  total-visible="5"
+  @update:model-value="scrollToTop"
+/>
         </v-row>
       </v-container>
 

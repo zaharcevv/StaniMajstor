@@ -1,358 +1,330 @@
 <template>
   <v-app>
-    <div class="layout-wrapper d-flex">
-      <!-- Sidebar -->
-      <v-navigation-drawer app v-model="drawer" class="sidebar" color="#1e1e1e" width="240">
-        <v-list dense>
-          <v-list-item @click="router.push('/')">
-            <v-list-item-icon><v-icon color="yellow">mdi-view-dashboard</v-icon></v-list-item-icon>
-            <v-list-item-title class="text-white">Дашборд</v-list-item-title>
-          </v-list-item>
-          <v-list-item @click="router.push('/user-profile')">
-            <v-list-item-icon><v-icon color="yellow">mdi-account</v-icon></v-list-item-icon>
-            <v-list-item-title class="text-white">Профил</v-list-item-title>
-          </v-list-item>
-          <v-list-item @click="router.push('/logout')">
-            <v-list-item-icon><v-icon color="red">mdi-logout</v-icon></v-list-item-icon>
-            <v-list-item-title class="text-white">Одјави се</v-list-item-title>
-          </v-list-item>
-        </v-list>
-      </v-navigation-drawer>
+    <!-- Topbar -->
+    <v-app-bar flat color="#212121">
+      <v-app-bar-nav-icon @click="drawer = !drawer" />
+      <v-toolbar-title class="logo-title">
+  <span class="logo-text">DoneRight</span>
+</v-toolbar-title>
 
-      <v-main class="main-area">
-        <v-container fluid>
-          <v-btn icon @click="drawer = !drawer" class="mb-4">
-            <v-icon color="white">mdi-menu</v-icon>
-          </v-btn>
-          <h1 class="dashboard-title">Добредојде назад, {{ firstName }} 👋</h1>
 
-          <!-- Status & Quick Info -->
-          <v-row>
-            <v-col cols="12" sm="6" md="3">
-              <v-card class="stat-card status-card">
-                <v-icon size="28" color="green">mdi-checkbox-marked-circle-outline</v-icon>
-                <div>
-                  <h4 class="status-text">Онлајн</h4>
-                  <p class="status-sub">Статус на достапност</p>
-                </div>
-              </v-card>
-            </v-col>
 
-            <v-col cols="12" sm="6" md="3" v-for="metric in metrics" :key="metric.title">
-              <v-card class="stat-card">
-                <v-icon :color="metric.color" size="28" class="mb-2">{{ metric.icon }}</v-icon>
-                <h3 class="stat-number">{{ metric.value }}</h3>
-                <p class="stat-label">{{ metric.title }}</p>
+
+      <v-spacer></v-spacer>
+
+      <!-- User Profile Right -->
+      <div class="d-flex align-center">
+        <span class="text-white font-weight-medium mr-3">{{ firstName }}</span>
+        <v-avatar size="36" class="mr-3">
+          <v-img src="https://randomuser.me/api/portraits/men/32.jpg" alt="User" />
+        </v-avatar>
+      </div>
+    </v-app-bar>
+
+    <!-- Sidebar -->
+    <v-navigation-drawer
+  v-model="drawer"
+  app
+  color="#1c1c1c"
+  dark
+  class="drawer-style"
+  :permanent="!$vuetify.display.smAndDown"
+>
+  <v-list dense nav>
+    <!-- <v-divider class="my-4" /> -->
+    <v-list-item
+  v-for="item in menuItems"
+  :key="item.title"
+  link
+  class="drawer-item"
+  @click="router.push(item.route)"
+>
+  <v-row no-gutters align="center">
+    <v-col cols="auto">
+      <v-icon :color="item.color" size="26">{{ item.icon }}</v-icon>
+    </v-col>
+    <v-col>
+      <v-list-item-title class="drawer-text">{{ item.title }}</v-list-item-title>
+    </v-col>
+  </v-row>
+</v-list-item>
+
+  </v-list>
+</v-navigation-drawer>
+
+
+    <!-- Main Content -->
+    <v-main class="background-main">
+      <v-container fluid>
+        <h1 class="main-heading">Добредојде назад, {{ firstName }} 👋</h1>
+
+        <!-- Metrics -->
+        <v-row class="mb-8">
+          <v-col cols="12" md="4" v-for="metric in metrics" :key="metric.title">
+            <v-card class="card-metric">
+              <v-card-text class="text-center">
+                <v-icon :color="metric.color" size="40">{{ metric.icon }}</v-icon>
+                <h3 class="metric-value mt-2">{{ metric.value }}</h3>
+                <div class="metric-title">{{ metric.title }}</div>
+              </v-card-text>
+            </v-card>
+          </v-col>
+        </v-row>
+
+        <!-- My Services -->
+        <section>
+          <div class="d-flex justify-space-between align-center mb-4">
+            <h2 class="section-title">Мои Услуги</h2>
+            <v-btn color="warning" class="font-weight-bold" @click="router.push('/next-form')">
+              Додади Услуга
+            </v-btn>
+          </div>
+
+          <v-row v-if="userServices.length" dense>
+            <v-col cols="12" sm="6" md="4" v-for="service in userServices" :key="service.id">
+              <v-card class="card-service">
+                <v-card-title class="text-yellow font-weight-bold">{{ service.service || 'Без име' }}</v-card-title>
+                <v-card-text>
+                  <p><strong>Опис:</strong> {{ service.description || 'Нема опис' }}</p>
+                  <p><strong>Град:</strong> {{ service.location || 'Непознато' }}</p>
+                  <p><strong>Цена:</strong> {{ service.price || 'Н/П' }}</p>
+                </v-card-text>
+                <v-card-actions>
+                  <v-btn variant="text" color="yellow" @click="router.push(`/edit-service/${service.id}`)">Уреди</v-btn>
+                  <v-btn variant="text" color="error" @click="deleteService(service.id)">Избриши</v-btn>
+                </v-card-actions>
               </v-card>
             </v-col>
           </v-row>
 
-          <!-- My Services -->
-          <section class="my-services mt-10">
-            <div class="d-flex justify-space-between align-center mb-4">
-              <h2 class="section-title">Мои објавени услуги</h2>
-              <v-btn color="warning" @click="router.push('/next-form')">
-                ➕ Објави нова услуга
-              </v-btn>
-            </div>
+          <v-row v-else justify="center">
+            <v-col cols="12" class="text-center text-grey">
+              <v-icon size="48" class="mb-2">mdi-wrench</v-icon>
+              <p>Немате објавено ниедна услуга.</p>
+            </v-col>
+          </v-row>
+        </section>
 
-            <v-row v-if="userServices.length" dense>
-              <v-col
-                v-for="service in userServices"
-                :key="service.id"
-                cols="12"
-                sm="6"
-                md="4"
-              >
-                <v-card class="my-service-card" elevation="6">
-                  <v-card-title class="text-yellow font-weight-bold">
-                    {{ service.service || 'Без име' }}
-                  </v-card-title>
-                  <v-card-text>
-                    <div><strong>Опис:</strong> {{ service.description || 'Немате внесено опис' }}</div>
-                    <div><strong>Град:</strong> {{ service.location || 'Непознато' }}</div>
-                    <div><strong>Цена:</strong> {{ service.price || 'Н/П' }}</div>
-                    <v-btn class="mt-3" variant="text" color="warning" @click="router.push(`/edit-service/${service.id}`)">
-                      Уреди услуга / Слики
-                    </v-btn>
-                  </v-card-text>
-                  <v-card-actions>
-                    <v-btn color="error" variant="tonal" @click="deleteService(service.id)">
-                      Избриши
-                    </v-btn>
-                  </v-card-actions>
-                </v-card>
-              </v-col>
-            </v-row>
-
-            <v-row v-else justify="center" class="mt-6">
-              <v-col cols="12" class="text-center text-grey">
-                <v-icon size="48" class="mb-2">mdi-wrench</v-icon>
-                <p>Сё уште немате објавено ниедна услуга.</p>
-              </v-col>
-            </v-row>
-          </section>
-
-          <!-- Upcoming Jobs -->
-          <div class="section">
-            <h2 class="section-title">Закажани работи</h2>
-            <v-table class="custom-table">
-              <thead>
-                <tr>
-                  <th>Клиент</th>
-                  <th>Услуга</th>
-                  <th>Датум</th>
-                  <th>Локација</th>
-                  <th>Статус</th>
-                </tr>
-              </thead>
-              <tbody>
-                <tr v-for="job in upcomingJobs" :key="job.id">
-                  <td>{{ job.client }}</td>
-                  <td>{{ job.service }}</td>
-                  <td>{{ job.date }}</td>
-                  <td>{{ job.location }}</td>
-                  <td><v-chip :color="job.statusColor" small>{{ job.status }}</v-chip></td>
-                </tr>
-              </tbody>
-            </v-table>
-          </div>
-
-          <!-- Reviews -->
-          <div class="section">
-            <h2 class="section-title">Најнови рецензии</h2>
-            <v-row>
-              <v-col cols="12" sm="6" md="4" v-for="r in reviews" :key="r.id">
-                <v-card class="review-card">
+        <!-- Reviews -->
+        <section class="mt-12">
+          <h2 class="section-title">Рецензии</h2>
+          <v-row>
+            <v-col cols="12" sm="6" md="4" v-for="review in reviews" :key="review.id">
+              <v-card class="card-review">
+                <v-card-text>
                   <div class="d-flex justify-space-between align-center mb-2">
-                    <strong>{{ r.name }}</strong>
-                    <v-rating :value="r.rating" readonly dense color="yellow-darken-2" />
+                    <strong>{{ review.name }}</strong>
+                    <v-rating :value="review.rating" dense readonly color="yellow-darken-2" />
                   </div>
-                  <p class="text-white">{{ r.comment }}</p>
-                </v-card>
-              </v-col>
-            </v-row>
-          </div>
-        </v-container>
-      </v-main>
-    </div>
-  </v-app>
-</template>
+                  <p class="text-white">{{ review.comment }}</p>
+                </v-card-text>
+              </v-card>
+            </v-col>
+          </v-row>
+        </section>
 
+      </v-container>
+    </v-main>
+</v-app>
+</template>
 <script setup>
 import { useRouter } from 'vue-router'
-import { ref, onMounted } from 'vue'
+import { ref, onMounted, watch } from 'vue'
 import { getAuth, onAuthStateChanged } from 'firebase/auth'
 import { collection, query, where, getDocs, deleteDoc, doc } from 'firebase/firestore'
 import { db } from '@/firebase'
+import { useDisplay } from 'vuetify' // 📦 додадено
 
 const router = useRouter()
-const drawer = ref(true)
-const username = ref('')
-const firstName = ref('')
+const { smAndDown } = useDisplay()
+
+const drawer = ref(!smAndDown.value) // 🛠️ затворен ако е мал екран
+watch(smAndDown, (val) => {
+  drawer.value = !val
+})
+const firstName = ref('Мајсторе')
 const reviews = ref([])
+const userServices = ref([])
+
+const menuItems = [
+  { title: 'Почетна', icon: 'mdi-view-dashboard', color: 'yellow', route: '/' },
+  { title: 'Профил', icon: 'mdi-account', color: 'yellow', route: '/user-profile' },
+  { title: 'Поставки', icon: 'mdi-cog', color: 'yellow', route: '/settings' },
+  { title: 'Одјави се', icon: 'mdi-logout', color: 'red', route: '/logout' } // 🛠️ NEW
+]
+
 
 const metrics = [
-  { title: 'Приходи овој месец', value: '$2,340', icon: 'mdi-cash', color: 'green' },
+  { title: 'Приходи', value: '$2,340', icon: 'mdi-cash', color: 'green' },
   { title: 'Завршени задачи', value: '14', icon: 'mdi-check-circle', color: 'yellow-darken-2' },
   { title: 'Активни понуди', value: '3', icon: 'mdi-briefcase-outline', color: 'blue' }
 ]
 
-const upcomingJobs = [
-  { id: 1, client: 'Јана', service: 'Електричар', date: '25.04.2025', location: 'Скопје', status: 'Потврдено', statusColor: 'green' },
-  { id: 2, client: 'Марко', service: 'Водовод', date: '27.04.2025', location: 'Битола', status: 'Во тек', statusColor: 'blue' }
-]
-
-const userServices = ref([])
-
 const fetchUserServices = async (uid) => {
   const q = query(collection(db, 'services'), where('userId', '==', uid))
   const snapshot = await getDocs(q)
-
-  const enriched = await Promise.all(snapshot.docs.map(async (docSnap) => {
-    const serviceData = docSnap.data()
-    let city = 'Непознато'
-
-    try {
-      const userQuery = query(collection(db, 'users'), where('uid', '==', uid))
-      const userSnap = await getDocs(userQuery)
-      if (!userSnap.empty) {
-        const userData = userSnap.docs[0].data()
-        city = userData.city || city
-        firstName.value = userData.firstName || 'Мајсторе'
-      }
-    } catch (error) {
-      console.error('Error fetching city or name:', error)
-    }
-
-    return {
-      id: docSnap.id,
-      ...serviceData,
-      location: city
-    }
-  }))
-
-  userServices.value = enriched
+  userServices.value = snapshot.docs.map(docSnap => ({ id: docSnap.id, ...docSnap.data() }))
 }
 
 const fetchUserReviews = async (uid) => {
-  try {
-    const q = query(collection(db, 'reviews'), where('sellerId', '==', uid))
-    const snapshot = await getDocs(q)
-
-    if (snapshot.empty) {
-      console.log('Нема рецензии за овој корисник.')
-    }
-
-    reviews.value = snapshot.docs.map(doc => {
-      const data = doc.data()
-      console.log('Рецензија:', data)  // Debug log
-      return {
-        id: doc.id,
-        name: data.name || 'Клиент',
-        rating: data.rating || 0,
-        comment: data.comment || 'Без коментар'
-      }
-    })
-  } catch (err) {
-    console.error('Грешка при повлекување рецензии:', err)
-  }
+  const q = query(collection(db, 'reviews'), where('sellerId', '==', uid))
+  const snapshot = await getDocs(q)
+  reviews.value = snapshot.docs.map(docSnap => ({ id: docSnap.id, ...docSnap.data() }))
 }
-
 
 const deleteService = async (id) => {
   await deleteDoc(doc(db, 'services', id))
-  userServices.value = userServices.value.filter(s => s.id !== id)
+  userServices.value = userServices.value.filter(service => service.id !== id)
 }
 
 onMounted(() => {
   const auth = getAuth()
-  const user = auth.currentUser
-
-  const init = (u) => {
-    username.value = u.displayName || ''
-    fetchUserServices(u.uid)
-    fetchUserReviews(u.uid)
-  }
-
-  if (user) {
-    init(user)
-  } else {
-    onAuthStateChanged(auth, (user) => {
-      if (user) {
-        init(user)
-      }
-    })
-  }
+  onAuthStateChanged(auth, (user) => {
+    if (user) {
+      firstName.value = user.displayName || 'Мајсторе'
+      fetchUserServices(user.uid)
+      fetchUserReviews(user.uid)
+    }
+  })
 })
 </script>
+
 <style scoped>
-.layout-wrapper {
-  background: linear-gradient(135deg, #121212, #1b1b1b);
+.background-main {
+  background: linear-gradient(135deg, #181818, #121212);
   min-height: 100vh;
-  padding: 40px 24px;
-  font-family: 'Inter', sans-serif;
+  padding-top: 60px;
 }
 
-.dashboard-title {
-  font-size: 2.8rem;
+.drawer-style {
+  border-right: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+.main-heading {
+  font-size: 2.5rem;
   color: #ffc107;
   font-weight: 900;
-  margin-bottom: 40px;
-  letter-spacing: -0.5px;
-  text-shadow: 0 0 6px rgba(255, 193, 7, 0.2);
-}
-
-.section {
-  margin-top: 50px;
+  margin-bottom: 30px;
 }
 
 .section-title {
   font-size: 1.6rem;
+  font-weight: bold;
   color: #ffc107;
-  font-weight: 700;
-  margin-bottom: 20px;
-  letter-spacing: -0.3px;
 }
 
-.stat-card {
-  background: rgba(255, 255, 255, 0.05);
-  backdrop-filter: blur(14px);
-  border-radius: 18px;
+.card-metric {
+  background: rgba(255, 255, 255, 0.04);
+  backdrop-filter: blur(8px);
+  border-radius: 16px;
   padding: 24px;
-  text-align: center;
   color: white;
-  box-shadow: 0 10px 28px rgba(0, 0, 0, 0.3);
-  transition: all 0.25s ease;
+  text-align: center;
 }
 
-.stat-card:hover {
-  transform: scale(1.02);
-}
-
-.stat-number {
+.metric-value {
   font-size: 2rem;
   font-weight: bold;
-  margin: 8px 0;
+  margin-top: 8px;
 }
 
-.stat-label {
+.metric-title {
+  color: #bbb;
   font-size: 1rem;
-  color: #ccc;
+  margin-top: 4px;
 }
 
-.status-card {
+.card-service {
+  background: rgba(255, 255, 255, 0.04);
+  border-radius: 16px;
+  padding: 20px;
+  color: white;
+  backdrop-filter: blur(8px);
+  transition: all 0.3s ease;
+}
+
+.card-service:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 8px 16px rgba(255, 193, 7, 0.2);
+}
+
+.card-review {
+  background: rgba(255, 255, 255, 0.04);
+  padding: 20px;
+  border-radius: 14px;
+  backdrop-filter: blur(8px);
+  color: white;
+  transition: 0.3s;
+}
+
+.card-review:hover {
+  transform: translateY(-3px);
+}
+
+.logo-title {
+  flex: 0 1 auto !important;
+  min-width: unset !important;
+  max-width: unset !important;
+  overflow: visible !important;
+}
+
+.logo-text {
+  white-space: nowrap;
+  overflow: visible;
+  text-overflow: unset;
+  font-style: italic;
+  font-weight: 700;
+  font-size: 1.7rem;
+  color: #ffc107;
+  animation: fadeInLogo 1.2s ease forwards;
+  opacity: 0;
+  transform: translateY(-8px);
+}
+
+
+
+/* Animation Keyframes */
+@keyframes fadeInLogo {
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.drawer-header {
   display: flex;
   align-items: center;
-  gap: 20px;
   justify-content: center;
-  background-color: #1f1f1f;
-  border-radius: 18px;
-  padding: 20px;
-  box-shadow: 0 8px 18px rgba(0, 0, 0, 0.3);
-}
-
-.status-text {
-  font-size: 1.3rem;
-  color: #4caf50;
+  font-size: 1.4rem;
   font-weight: 700;
-}
-
-.status-sub {
-  font-size: 0.85rem;
-  color: #aaa;
-}
-
-.my-service-card {
-  background: rgba(255, 255, 255, 0.04);
-  border: 1px solid rgba(255, 255, 255, 0.07);
-  border-radius: 16px;
-  padding: 16px;
-  color: white;
-  transition: transform 0.3s ease, box-shadow 0.3s ease;
-  backdrop-filter: blur(10px);
-}
-
-.my-service-card:hover {
-  transform: translateY(-6px);
-  box-shadow: 0 14px 28px rgba(255, 193, 7, 0.2);
-}
-
-.review-card {
-  background: #1e1e1e;
-  padding: 20px;
-  border-radius: 14px;
-  border: 1px solid rgba(255, 255, 255, 0.06);
-  color: white;
-  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.2);
-}
-
-.chart-placeholder {
-  background: #1c1c1c;
-  border-radius: 14px;
-  color: #999;
-  text-align: center;
+  color: #ffc107;
+  margin-top: 20px;
+  margin-bottom: 20px;
   font-style: italic;
+  letter-spacing: 1px;
 }
+
+.drawer-brand {
+  margin-left: 8px;
+}
+
+.drawer-item {
+  padding: 12px 16px;
+  border-radius: 8px;
+  transition: background-color 0.3s;
+}
+
+.drawer-item:hover {
+  background-color: rgba(255, 255, 255, 0.08);
+}
+
+.drawer-text {
+  font-size: 1.05rem;
+  font-weight: 600;
+  color: white;
+  margin-left: 12px; /* мала дистанца помеѓу иконата и текстот */
+}
+
+
 
 </style>
