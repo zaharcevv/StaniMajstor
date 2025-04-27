@@ -15,7 +15,7 @@
           </v-col>
 
           <v-col cols="12" md="4">
-            <v-card class="role-card" @click="router.push('/register-master')">
+            <v-card class="role-card" @click="router.push('/how-it-works')">
               <v-icon size="48" color="warning">mdi-hammer-screwdriver</v-icon>
               <h3 class="mt-3">Мајстор</h3>
               <p>Регистрирај се како мајстор и понуди свои услуги на платформата.</p>
@@ -34,11 +34,17 @@ const router = useRouter()
 
 <style scoped>
 .role-choice-container {
-  padding: 120px 20px 60px;
-  background: linear-gradient(135deg, #1e1e1e, #121212);
   min-height: 100vh;
+  background: linear-gradient(135deg, #1e1e1e, #121212);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-direction: column;
+  padding: 20px;
+  text-align: center;
   color: white;
 }
+
 
 .title {
   font-size: 2.4rem;

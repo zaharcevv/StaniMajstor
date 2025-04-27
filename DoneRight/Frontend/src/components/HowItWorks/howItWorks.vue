@@ -4,7 +4,7 @@
     <div class="container">
       <h1 class="main-title">Како да станеш мајстор?</h1>
       <p class="description">
-        Никогаш не било поедноставно! Следи ги овие едноставни чекори и стани мајстор денес.
+        Никогаш не било полесно! Креирај профил, постави ја твојата услуга и започни да работиш!
       </p>
 
       <v-row class="steps-grid" justify="center" align="stretch">
@@ -13,15 +13,11 @@
           <v-card class="step-card" elevation="4">
             <div class="step-icon">
               <i class="mdi mdi-account-plus" />
-              <span class="step-number">1</span>
             </div>
-            <v-card-title class="step-title">Регистрирај се</v-card-title>
+            <v-card-title class="step-title">Креирај профил</v-card-title>
             <v-card-text class="step-text">
-              Немаш профил? Креирај нов за да започнеш со користење на платформата.
+              Регистрирај се како мајстор за да започнеш да ги нудиш твоите услуги преку нашата платформа.
             </v-card-text>
-            <v-card-actions>
-              <v-btn color="warning" block @click="router.push('/apply')">Регистрирај се</v-btn>
-            </v-card-actions>
           </v-card>
         </v-col>
 
@@ -29,65 +25,29 @@
         <v-col cols="12" md="6" lg="4">
           <v-card class="step-card" elevation="4">
             <div class="step-icon">
-              <i class="mdi mdi-login" />
-              <span class="step-number">2</span>
-            </div>
-            <v-card-title class="step-title">Најави се</v-card-title>
-            <v-card-text class="step-text">
-              Веќе имаш профил? Најави се и продолжи со следниот чекор.
-            </v-card-text>
-            <v-card-actions>
-              <v-btn color="warning" block @click="router.push('/login')">Најави се</v-btn>
-            </v-card-actions>
-          </v-card>
-        </v-col>
-
-        <!-- Step 3 -->
-        <v-col cols="12" md="6" lg="4">
-          <v-card class="step-card" elevation="4">
-            <div class="step-icon">
               <i class="mdi mdi-briefcase-plus" />
-              <span class="step-number">3</span>
             </div>
             <v-card-title class="step-title">Објави услуга</v-card-title>
             <v-card-text class="step-text">
-              Ако си најавен, објави ја твојата прва услуга и започни да работиш.
+              Додај ги твоите вештини и информации за да те најдат клиентите што им треба токму твојата услуга.
             </v-card-text>
-            <v-card-actions>
-              <v-btn color="warning" block @click="handleNextStep">Објави услуга</v-btn>
-            </v-card-actions>
           </v-card>
         </v-col>
       </v-row>
+
+      <!-- Big button -->
+      <div class="register-btn-wrapper mt-8">
+        <v-btn color="warning" size="large" class="text-black font-weight-bold" @click="router.push('/register-master')">
+          Регистрирај се
+        </v-btn>
+      </div>
     </div>
   </div>
 </template>
 
 <script setup>
 import { useRouter } from 'vue-router'
-import { getAuth, onAuthStateChanged } from 'firebase/auth'
-import { ref, onMounted } from 'vue'
-
 const router = useRouter()
-const isLoggedIn = ref(false)
-
-onMounted(() => {
-  const auth = getAuth()
-  onAuthStateChanged(auth, (user) => {
-    isLoggedIn.value = !!user
-  })
-})
-
-const handleNextStep = () => {
-  const auth = getAuth()
-  const user = auth.currentUser
-
-  if (!user) {
-    router.push('/login')
-  } else {
-    router.push('/next-form')
-  }
-}
 </script>
 
 <style scoped>
@@ -168,10 +128,6 @@ const handleNextStep = () => {
   padding: 10px 0;
 }
 
-.v-card-actions {
-  padding: 16px;
-}
-
 .step-icon {
   font-size: 48px;
   margin-top: 10px;
@@ -195,5 +151,10 @@ const handleNextStep = () => {
   justify-content: center;
   box-shadow: 0 0 10px rgba(0, 0, 0, 0.3);
 }
-</style>
 
+.register-btn-wrapper {
+  margin-top: 40px;
+  display: flex;
+  justify-content: center;
+}
+</style>

@@ -140,6 +140,14 @@ const redirectToLogin = () => {
   width: 100%;
   color: white;
 }
+
+.v-card-subtitle {
+  white-space: normal !important;
+  overflow: visible !important;
+  text-overflow: unset !important;
+}
+
+
 .error-text {
   color: #ff5252;
   font-size: 0.9rem;

@@ -154,29 +154,31 @@ const scrollToNext = () => {
 /* Responsive */
 @media (max-width: 768px) {
   .hero-title {
-    font-size: 2.6rem;
+    font-size: 3rem; /* беше 2.6rem -> направено 3rem */
   }
 
   .hero-subtitle {
-    font-size: 1.05rem;
+    font-size: 1.2rem; /* беше 1.05rem -> направено 1.2rem */
   }
 
   .tagline {
-    font-size: 0.9rem;
+    font-size: 1.1rem; /* беше 0.9rem -> направено 1.1rem */
   }
 
   .hero-banner {
     background-attachment: scroll !important;
+  }
 }
-}
+
 @media (max-width: 500px) {
   .hero-title {
-    font-size: 2.2rem;
+    font-size: 2.6rem; /* беше 2.2rem -> направено 2.6rem */
   }
 
   .hero-subtitle {
-    font-size: 0.95rem;
+    font-size: 1.2rem; /* беше 0.95rem -> направено 1.1rem */
     margin-bottom: 24px;
   }
 }
+
 </style>

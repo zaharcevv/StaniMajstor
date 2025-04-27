@@ -167,55 +167,53 @@ onMounted(async () => {
   <v-app>
     <section class="search-section">
       <v-container>
-        <div class="header text-center mb-5 animate-header">
+        <div class="header text-center mb-8 animate-header">
           <h1 class="main-title">Најди Мајстор</h1>
           <p class="subtitle-text">Пронајди професионалци по локација и услуга</p>
         </div>
 
         <!-- Name Search Field -->
-        <v-row justify="center" class="compact-gap" >
-          <v-col cols="12" md="5">
-            <v-text-field
-              v-model="searchName"
-              label="Пребарај по име"
-              density="comfortable"
-              variant="outlined"
-              color="warning"
-              prepend-inner-icon="mdi-account-search"
-              clearable
-            />
-          </v-col>
-        </v-row>
+<!-- All Filters in one Row -->
+<v-row justify="center" class="filters-gap" no-gutters>
+  <v-col cols="12" md="5">
+    <v-text-field
+      v-model="searchName"
+      label="Пребарај по име"
+      density="comfortable"
+      variant="outlined"
+      color="warning"
+      prepend-inner-icon="mdi-account-search"
+      clearable
+    />
+  </v-col>
 
-        <!-- Filters -->
-        <v-row justify="center" class="mb-3 gap-inputs" >
-          <v-col cols="12" md="3">
-            <v-autocomplete
-              v-model="searchService"
-              :items="allServices"
-              label="Тип на услуга"
-              density="comfortable"
-              variant="outlined"
-              color="warning"
-              hide-no-data
-              clearable
-              menu-icon="mdi-chevron-down"
-            />
-          </v-col>
+  <v-col cols="12" md="3">
+    <v-autocomplete
+      v-model="searchService"
+      :items="allServices"
+      label="Тип на услуга"
+      density="comfortable"
+      variant="outlined"
+      color="warning"
+      hide-no-data
+      clearable
+      menu-icon="mdi-chevron-down"
+    />
+  </v-col>
 
-          <v-col cols="12" md="3">
-            <v-select
-              v-model="searchCity"
-              :items="cities"
-              label="Одбери град"
-              density="comfortable"
-              variant="outlined"
-              color="warning"
-              clearable
-              menu-icon="mdi-chevron-down"
-            />
-          </v-col>
-        </v-row>
+  <v-col cols="12" md="3">
+    <v-select
+      v-model="searchCity"
+      :items="cities"
+      label="Одбери град"
+      density="comfortable"
+      variant="outlined"
+      color="warning"
+      clearable
+      menu-icon="mdi-chevron-down"
+    />
+  </v-col>
+</v-row>
 
         <!-- Service Cards -->
         <v-row v-if="paginatedServices.length">
@@ -308,7 +306,7 @@ onMounted(async () => {
 .search-section {
   background: linear-gradient(135deg, #1c1c1c, #101010);
   min-height: 100vh;
-  padding-top: 80px;
+  padding-top: 90px;
   padding-bottom: 60px;
   color: white;
 }
@@ -377,6 +375,16 @@ onMounted(async () => {
   background-color: #2c2c2c;
   border-radius: 14px;
   box-shadow: 0 12px 28px rgba(0, 0, 0, 0.4);
+}
+
+.filters-gap {
+  gap: 16px; /* нормален gap за десктоп */
+}
+
+@media (max-width: 960px) {
+  .filters-gap {
+    row-gap: 8px; /* мал gap за мобилен и таблет */
+  }
 }
 
 

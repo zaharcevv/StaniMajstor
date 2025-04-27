@@ -132,7 +132,7 @@ const changePassword = async () => {
   position: relative;
   width: 100%;
   height: 100vh;
-  background-color: #212529;
+  background: linear-gradient(135deg, #1e1e1e, #121212);
   display: flex;
   justify-content: center;
   align-items: center;

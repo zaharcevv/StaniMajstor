@@ -24,12 +24,8 @@
             </template>
 
             <template v-else-if="step === 2">
-              <v-select v-model="form.service" :items="availableServices" label="Изберете услуга" variant="outlined" density="comfortable" color="warning" class="mb-4" hide-details required />
               <v-text-field v-model="form.phone" label="Телефонски број" variant="outlined" density="comfortable" color="warning" class="mb-4" hide-details required />
               <v-select v-model="form.city" :items="cities" label="Град" variant="outlined" density="comfortable" color="warning" class="mb-4" hide-details required />
-              <v-text-field v-model="form.description" label="Краток опис за вас" variant="outlined" density="comfortable" color="warning" class="mb-4" hide-details required />
-              <v-text-field v-model="form.experience" label="Искуство (години)" type="number" variant="outlined" density="comfortable" color="warning" class="mb-4" hide-details required />
-              <v-text-field v-model="form.price" label="Цена за услуга ($)" type="number" variant="outlined" density="comfortable" color="warning" class="mb-4" hide-details required />
 
               <p v-if="errorMessage" class="error-text">{{ errorMessage }}</p>
               <v-btn @click="goBack" block variant="text" class="text-white">Назад</v-btn>
@@ -53,7 +49,7 @@
 import { ref } from 'vue'
 import { useRouter } from 'vue-router'
 import { getAuth, createUserWithEmailAndPassword, updateProfile } from 'firebase/auth'
-import { doc, setDoc } from 'firebase/firestore'
+import { doc, setDoc, updateDoc } from 'firebase/firestore'
 import { db } from '@/firebase'
 
 const router = useRouter()
@@ -64,21 +60,12 @@ const form = ref({
   lastName: '',
   email: '',
   password: '',
-  service: '',
-  description: '',
-  experience: '',
-  price: '',
   phone: '',
   city: '',
 })
 
 const errorMessage = ref('')
-const createdUserUid = ref(null) // Store the user ID after step 1
-
-const availableServices = [
-  'Електричар', 'Водоводџија', 'Каменорезец', 'Автомеханичар',
-  'Фотограф', 'Графички дизајн', 'Преведувач'
-]
+const createdUserUid = ref(null)
 
 const cities = ['Скопје', 'Битола', 'Тетово', 'Прилеп', 'Охрид']
 
@@ -135,9 +122,9 @@ const goBack = () => {
 }
 
 const submitApplication = async () => {
-  const { service, description, experience, price, phone, city } = form.value
+  const { phone, city } = form.value
 
-  if (!service || !description || !experience || !price || !phone || !city) {
+  if (!phone || !city) {
     errorMessage.value = 'Пополнете ги сите полиња.'
     return
   }
@@ -148,19 +135,12 @@ const submitApplication = async () => {
   }
 
   try {
-    // Update the user profile with extra data (Step 2)
-    await setDoc(doc(db, 'users', createdUserUid.value), {
-      uid: createdUserUid.value,
-      email: form.value.email,
-      firstName: form.value.firstName,
-      lastName: form.value.lastName,
+    await updateDoc(doc(db, 'users', createdUserUid.value), {
       phone,
       city,
       isSeller: true,
-      profilePicture: '',
     })
 
-    // (Later) Save master-specific data if you want into another collection
     router.push('/success')
   } catch (error) {
     errorMessage.value = 'Грешка при ажурирање на профилот: ' + error.message
@@ -171,6 +151,8 @@ const redirectToLogin = () => {
   router.push('/login')
 }
 </script>
+
+
 
 
 <style scoped>
@@ -204,6 +186,14 @@ const redirectToLogin = () => {
   width: 100%;
   color: white;
 }
+
+.v-card-subtitle {
+  white-space: normal !important;
+  overflow: visible !important;
+  text-overflow: unset !important;
+}
+
+
 .error-text {
   color: #ff5252;
   font-size: 0.9rem;

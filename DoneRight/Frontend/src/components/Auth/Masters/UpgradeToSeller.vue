@@ -12,12 +12,27 @@
           </v-card-subtitle>
 
           <v-form @submit.prevent="submitApplication" class="px-4">
-            <v-select v-model="form.service" :items="availableServices" label="Изберете услуга" variant="outlined" density="comfortable" color="warning" class="mb-4" hide-details required />
-            <v-text-field v-model="form.phone" label="Телефонски број" variant="outlined" density="comfortable" color="warning" class="mb-4" hide-details required />
-            <v-select v-model="form.city" :items="cities" label="Град" variant="outlined" density="comfortable" color="warning" class="mb-4" hide-details required />
-            <v-text-field v-model="form.description" label="Краток опис за вас" variant="outlined" density="comfortable" color="warning" class="mb-4" hide-details required />
-            <v-text-field v-model="form.experience" label="Искуство (години)" type="number" variant="outlined" density="comfortable" color="warning" class="mb-4" hide-details required />
-            <v-text-field v-model="form.price" label="Цена за услуга ($)" type="number" variant="outlined" density="comfortable" color="warning" class="mb-4" hide-details required />
+            <v-text-field
+              v-model="form.phone"
+              label="Телефонски број"
+              variant="outlined"
+              density="comfortable"
+              color="warning"
+              class="mb-4"
+              hide-details
+              required
+            />
+            <v-select
+              v-model="form.city"
+              :items="cities"
+              label="Град"
+              variant="outlined"
+              density="comfortable"
+              color="warning"
+              class="mb-4"
+              hide-details
+              required
+            />
 
             <p v-if="errorMessage" class="error-text">{{ errorMessage }}</p>
 
@@ -35,27 +50,18 @@
 import { ref } from 'vue'
 import { useRouter } from 'vue-router'
 import { getAuth } from 'firebase/auth'
-import { doc, updateDoc, setDoc } from 'firebase/firestore'
+import { doc, updateDoc } from 'firebase/firestore'
 import { db } from '@/firebase'
 
 const router = useRouter()
 const auth = getAuth()
 
 const form = ref({
-  service: '',
   phone: '',
-  city: '',
-  description: '',
-  experience: '',
-  price: ''
+  city: ''
 })
 
 const errorMessage = ref('')
-
-const availableServices = [
-  'Електричар', 'Водоводџија', 'Каменорезец', 'Автомеханичар',
-  'Фотограф', 'Графички дизајн', 'Преведувач'
-]
 
 const cities = ['Скопје', 'Битола', 'Тетово', 'Прилеп', 'Охрид']
 
@@ -67,9 +73,9 @@ const submitApplication = async () => {
     return
   }
 
-  const { service, phone, city, description, experience, price } = form.value
+  const { phone, city } = form.value
 
-  if (!service || !phone || !city || !description || !experience || !price) {
+  if (!phone || !city) {
     errorMessage.value = 'Пополнете ги сите полиња.'
     return
   }
@@ -79,15 +85,6 @@ const submitApplication = async () => {
       phone,
       city,
       isSeller: true
-    })
-
-    await setDoc(doc(db, 'services', user.uid), {
-      userId: user.uid,
-      service,
-      description,
-      experience,
-      price,
-      createdAt: new Date()
     })
 
     router.push('/success')
@@ -129,6 +126,14 @@ const submitApplication = async () => {
   width: 100%;
   color: white;
 }
+
+.v-card-subtitle {
+  white-space: normal !important;
+  overflow: visible !important;
+  text-overflow: unset !important;
+}
+
+
 .error-text {
   color: #ff5252;
   font-size: 0.9rem;
