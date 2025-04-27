@@ -30,12 +30,16 @@ const allServices = ['Електричар', 'Водоводџија', 'Моле
 const cities = ['Скопје', 'Битола', 'Тетово', 'Куманово', 'Прилеп', 'Охрид', 'Гостивар', 'Штип', 'Кавадарци', 'Велес']
 
 const filteredServicesList = computed(() =>
-  services.value.filter(s =>
-    (!searchCity.value || s.location === searchCity.value) &&
-    (!searchService.value || String(s.job || '').toLowerCase().includes(searchService.value.toLowerCase())) &&
-    (!searchName.value || `${s.name} ${s.lastName}`.toLowerCase().includes(searchName.value.toLowerCase()))
-  )
+  services.value.filter(s => {
+    const fullName = `${s.name || ''} ${s.lastName || ''}`.toLowerCase()
+    return (
+      (!searchCity.value || s.location === searchCity.value) &&
+      (!searchService.value || String(s.job || '').toLowerCase().includes(searchService.value.toLowerCase())) &&
+      (!searchName.value || fullName.includes(searchName.value.toLowerCase()))
+    )
+  })
 )
+
 
 const paginatedServices = computed(() => {
   const start = (currentPage.value - 1) * itemsPerPage
